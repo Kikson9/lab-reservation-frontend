@@ -15,6 +15,7 @@ function Signup() {
     name: "",
     email: "",
     role: "Student",
+    studentId: "",
     password: "",
     confirmPassword: "",
   });
@@ -58,6 +59,14 @@ function Signup() {
       newErrors.confirmPassword = "Please confirm your password.";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    if (formData.role === "Student") {
+      if (!formData.studentId.trim()) {
+        newErrors.studentId = "Student ID is required.";
+      } else if (formData.studentId.trim().length < 4) {
+        newErrors.studentId = "Please enter a valid Student ID.";
+      }
     }
 
     return newErrors;
@@ -147,6 +156,30 @@ function Signup() {
               <option value="Admin">Admin</option>
             </select>
           </div>
+
+          {/* Student ID only shows when role is Student */}
+          {formData.role === "Student" && (
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                Student ID
+              </label>
+              <input
+                type="text"
+                name="studentId"
+                value={formData.studentId}
+                onChange={handleChange}
+                placeholder="e.g. 9240214001"
+                className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                  errors.studentId
+                    ? "border-red-400 dark:border-red-400"
+                    : "border-gray-200 dark:border-gray-700"
+                }`}
+              />
+              {errors.studentId && (
+                <p className="text-red-500 text-xs mt-1">{errors.studentId}</p>
+              )}
+            </div>
+          )}
 
           {/* Password */}
           <div>
