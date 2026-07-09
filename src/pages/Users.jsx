@@ -9,6 +9,7 @@ const initialUsers = [
     email: "daniel@university.edu",
     role: "Student",
     status: "Active",
+    studentId: "9240214001",
   },
   {
     id: 2,
@@ -16,6 +17,7 @@ const initialUsers = [
     email: "adu@university.edu",
     role: "Student",
     status: "Active",
+    studentId: "9240214002",
   },
   {
     id: 3,
@@ -23,6 +25,7 @@ const initialUsers = [
     email: "sixtus@university.edu",
     role: "Admin",
     status: "Active",
+    studentId: "",
   },
   {
     id: 4,
@@ -30,6 +33,7 @@ const initialUsers = [
     email: "ben@university.edu",
     role: "Student",
     status: "Inactive",
+    studentId: "9240214004",
   },
 ];
 
@@ -66,12 +70,19 @@ function Users() {
     email: "",
     role: "Student",
     status: "Active",
+    studentId: "",
   });
   const [modalErrors, setModalErrors] = useState({});
 
   function handleAddClick() {
     setEditingUser(null);
-    setFormData({ name: "", email: "", role: "Student", status: "Active" });
+    setFormData({
+      name: "",
+      email: "",
+      role: "Student",
+      status: "Active",
+      studentId: "",
+    });
     setModalErrors({});
     setModalOpen(true);
   }
@@ -83,6 +94,7 @@ function Users() {
       email: user.email,
       role: user.role,
       status: user.status,
+      studentId: user.studentId || "",
     });
     setModalErrors({});
     setModalOpen(true);
@@ -110,6 +122,14 @@ function Users() {
       newErrors.email = "Email is required.";
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
+    }
+
+    if (formData.role === "Student") {
+      if (!formData.studentId.trim()) {
+        newErrors.studentId = "Student ID is required.";
+      } else if (formData.studentId.trim().length < 4) {
+        newErrors.studentId = "Please enter a valid Student ID.";
+      }
     }
 
     return newErrors;
@@ -168,6 +188,7 @@ function Users() {
               <tr>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Student ID</th>
                 <th className="px-4 py-3 text-center">Role</th>
                 <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-4 py-3 text-center">Actions</th>
@@ -181,6 +202,17 @@ function Users() {
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {user.email}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                    {user.role === "Admin" ? (
+                      <span className="text-gray-300 dark:text-gray-600 text-xs italic">
+                        N/A
+                      </span>
+                    ) : (
+                      user.studentId || (
+                        <span className="text-red-400 text-xs">Not set</span>
+                      )
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {getRoleBadge(user.role)}
@@ -262,6 +294,31 @@ function Users() {
                   </p>
                 )}
               </div>
+              {/* Student ID - only for students */}
+              {formData.role === "Student" && (
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    name="studentId"
+                    value={formData.studentId}
+                    onChange={handleChange}
+                    placeholder="e.g. 9240214001"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                      modalErrors.studentId
+                        ? "border-red-400"
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                  />
+                  {modalErrors.studentId && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {modalErrors.studentId}
+                    </p>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                   Role
