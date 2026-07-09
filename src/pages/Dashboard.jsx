@@ -140,13 +140,13 @@ function Dashboard() {
             <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase">
               Total Labs
             </div>
-            <div className="w-8 h-8 bg-violet-100 dark:bg-violet-500/20 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-600/20 rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
                 height="14"
                 fill="currentColor"
-                className="text-violet-500"
+                className="text-blue-600"
                 viewBox="0 0 16 16"
               >
                 <path d="M9 2a1 1 0 0 0-2 0v5.293L5.707 9H1a1 1 0 0 0 0 2h5a1 1 0 0 0 .707-.293L8 9.414l1.293 1.293A1 1 0 0 0 10 11h5a1 1 0 1 0 0-2h-4.707L9 7.293V2Z" />
@@ -246,7 +246,7 @@ function Dashboard() {
             </h2>
             <Link
               to="/labs"
-              className="text-sm text-violet-500 hover:text-violet-600 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               Manage
             </Link>
@@ -291,7 +291,7 @@ function Dashboard() {
             </h2>
             <Link
               to="/reservations"
-              className="text-sm text-violet-500 hover:text-violet-600 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View all
             </Link>

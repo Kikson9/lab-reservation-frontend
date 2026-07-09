@@ -1,52 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 // Static placeholder data I will replace this with real API data
-const labOptions = ['Room 101', 'Room 203', 'Room 305', 'Room 102'];
-const userOptions = ['Daniel Okike', 'Adu Ahenkan', 'Sixtus John', 'Ben Hassan'];
+const labOptions = ["Room 101", "Room 203", "Room 305", "Room 102"];
+const userOptions = [
+  "Daniel Okike",
+  "Adu Ahenkan",
+  "Sixtus John",
+  "Ben Hassan",
+];
 
 const initialReservations = [
   {
     id: 1,
-    student: 'Daniel Okike',
-    lab: 'Room 101',
-    date: '2025-05-20',
-    time: '09:00',
-    status: 'Active',
+    student: "Daniel Okike",
+    lab: "Room 101",
+    date: "2025-05-20",
+    time: "09:00",
+    status: "Active",
   },
   {
     id: 2,
-    student: 'Adu Ahenkan',
-    lab: 'Room 203',
-    date: '2025-05-20',
-    time: '11:00',
-    status: 'Pending',
+    student: "Adu Ahenkan",
+    lab: "Room 203",
+    date: "2025-05-20",
+    time: "11:00",
+    status: "Pending",
   },
   {
     id: 3,
-    student: 'Sixtus John',
-    lab: 'Room 305',
-    date: '2025-05-19',
-    time: '14:00',
-    status: 'Cancelled',
+    student: "Sixtus John",
+    lab: "Room 305",
+    date: "2025-05-19",
+    time: "14:00",
+    status: "Cancelled",
   },
   {
     id: 4,
-    student: 'Ben Hassan',
-    lab: 'Room 102',
-    date: '2025-05-21',
-    time: '08:00',
-    status: 'Active',
+    student: "Ben Hassan",
+    lab: "Room 102",
+    date: "2025-05-21",
+    time: "08:00",
+    status: "Active",
   },
 ];
 
 // Status badge — three possible states this time
 function getStatusBadge(status) {
-  if (status === 'Active') {
-    return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">Active</span>;
-  } else if (status === 'Pending') {
-    return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-600">Pending</span>;
+  if (status === "Active") {
+    return (
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
+        Active
+      </span>
+    );
+  } else if (status === "Pending") {
+    return (
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-600">
+        Pending
+      </span>
+    );
   } else {
-    return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">Cancelled</span>;
+    return (
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
+        Cancelled
+      </span>
+    );
   }
 }
 
@@ -57,9 +74,9 @@ function Reservations() {
   const [formData, setFormData] = useState({
     student: userOptions[0],
     lab: labOptions[0],
-    date: '',
-    time: '',
-    status: 'Pending',
+    date: "",
+    time: "",
+    status: "Pending",
   });
 
   function handleAddClick() {
@@ -67,9 +84,9 @@ function Reservations() {
     setFormData({
       student: userOptions[0],
       lab: labOptions[0],
-      date: '',
-      time: '',
-      status: 'Pending',
+      date: "",
+      time: "",
+      status: "Pending",
     });
     setModalOpen(true);
   }
@@ -89,9 +106,11 @@ function Reservations() {
   // Cancel just updates the status — it doesn't delete the record
   // This is important: cancelled reservations should still be visible in history
   function handleCancel(id) {
-    setReservations(reservations.map(r =>
-      r.id === id ? { ...r, status: 'Cancelled' } : r
-    ));
+    setReservations(
+      reservations.map((r) =>
+        r.id === id ? { ...r, status: "Cancelled" } : r,
+      ),
+    );
   }
 
   function handleChange(e) {
@@ -100,9 +119,11 @@ function Reservations() {
 
   function handleSave() {
     if (editingReservation) {
-      setReservations(reservations.map(r =>
-        r.id === editingReservation.id ? { ...r, ...formData } : r
-      ));
+      setReservations(
+        reservations.map((r) =>
+          r.id === editingReservation.id ? { ...r, ...formData } : r,
+        ),
+      );
     } else {
       const newReservation = {
         id: reservations.length + 1,
@@ -115,7 +136,6 @@ function Reservations() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-
       {/* Page header */}
       <div className="sm:flex sm:justify-between sm:items-center mb-8">
         <div>
@@ -128,7 +148,7 @@ function Reservations() {
         </div>
         <button
           onClick={handleAddClick}
-          className="mt-4 sm:mt-0 btn bg-violet-500 hover:bg-violet-600 text-white"
+          className="mt-4 sm:mt-0 btn bg-blue-600 hover:bg-blue-700 text-white"
         >
           + New Reservation
         </button>
@@ -169,17 +189,17 @@ function Reservations() {
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => handleEditClick(r)}
-                      className="text-violet-500 hover:text-violet-600 font-medium mr-3"
+                      className="text-blue-600 hover:text-blue-700 font-medium mr-3"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleCancel(r.id)}
-                      disabled={r.status === 'Cancelled'}
+                      disabled={r.status === "Cancelled"}
                       className={`font-medium ${
-                        r.status === 'Cancelled'
-                          ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                          : 'text-red-400 hover:text-red-500'
+                        r.status === "Cancelled"
+                          ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                          : "text-red-400 hover:text-red-500"
                       }`}
                     >
                       Cancel
@@ -196,13 +216,11 @@ function Reservations() {
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-              {editingReservation ? 'Edit Reservation' : 'New Reservation'}
+              {editingReservation ? "Edit Reservation" : "New Reservation"}
             </h2>
 
             <div className="grid grid-cols-2 gap-4">
-
               {/* Student dropdown */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
@@ -212,10 +230,12 @@ function Reservations() {
                   name="student"
                   value={formData.student}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
-                  {userOptions.map(user => (
-                    <option key={user} value={user}>{user}</option>
+                  {userOptions.map((user) => (
+                    <option key={user} value={user}>
+                      {user}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -229,10 +249,12 @@ function Reservations() {
                   name="lab"
                   value={formData.lab}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
-                  {labOptions.map(lab => (
-                    <option key={lab} value={lab}>{lab}</option>
+                  {labOptions.map((lab) => (
+                    <option key={lab} value={lab}>
+                      {lab}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -247,7 +269,7 @@ function Reservations() {
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
               </div>
 
@@ -261,7 +283,7 @@ function Reservations() {
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
               </div>
 
@@ -274,14 +296,13 @@ function Reservations() {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Active">Active</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
-
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
@@ -293,16 +314,14 @@ function Reservations() {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 text-sm rounded-lg bg-violet-500 hover:bg-violet-600 text-white font-medium"
+                className="px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
-                {editingReservation ? 'Save Changes' : 'Save Reservation'}
+                {editingReservation ? "Save Changes" : "Save Reservation"}
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -35,7 +35,7 @@ const initialUsers = [
 
 function getRoleBadge(role) {
   return role === "Admin" ? (
-    <span className="px-2 py-1 text-xs font-medium rounded-full bg-violet-100 text-violet-600">
+    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
       Admin
     </span>
   ) : (
@@ -154,7 +154,7 @@ function Users() {
         </div>
         <button
           onClick={handleAddClick}
-          className="mt-4 sm:mt-0 btn bg-violet-500 hover:bg-violet-600 text-white"
+          className="mt-4 sm:mt-0 btn bg-blue-600 hover:bg-blue-700 text-white"
         >
           + Add User
         </button>
@@ -191,7 +191,7 @@ function Users() {
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => handleEditClick(user)}
-                      className="text-violet-500 hover:text-violet-600 font-medium mr-3"
+                      className="text-blue-600 hover:text-blue-700 font-medium mr-3"
                     >
                       Edit
                     </button>
@@ -228,7 +228,7 @@ function Users() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Daniel Okike"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     modalErrors.name
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
@@ -250,7 +250,7 @@ function Users() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="e.g. daniel@university.edu"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     modalErrors.email
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
@@ -270,7 +270,7 @@ function Users() {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
                   <option value="Student">Student</option>
                   <option value="Admin">Admin</option>
@@ -284,7 +284,7 @@ function Users() {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -304,7 +304,7 @@ function Users() {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 text-sm rounded-lg bg-violet-500 hover:bg-violet-600 text-white font-medium"
+                className="px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {editingUser ? "Save Changes" : "Save User"}
               </button>

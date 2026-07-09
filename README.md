@@ -1,4 +1,4 @@
-# LabReserve — Lab Reservation System
+# LabReserve - Lab Reservation System
 
 A full-stack university lab reservation system built with React and Django.
 

@@ -6,7 +6,7 @@ function NotFound() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="text-center">
         {/* Big 404 number */}
-        <h1 className="text-9xl font-bold text-violet-500 mb-4">404</h1>
+        <h1 className="text-9xl font-bold text-blue-600 mb-4">404</h1>
 
         {/* Message */}
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
@@ -19,7 +19,7 @@ function NotFound() {
         {/* Back home */}
         <Link
           to="/"
-          className="inline-block px-6 py-2.5 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-lg transition duration-150"
+          className="inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-150"
         >
           Back to Dashboard
         </Link>

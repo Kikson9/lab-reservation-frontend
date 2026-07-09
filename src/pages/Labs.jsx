@@ -146,7 +146,7 @@ function Labs() {
         </div>
         <button
           onClick={handleAddClick}
-          className="mt-4 sm:mt-0 btn bg-violet-500 hover:bg-violet-600 text-white"
+          className="mt-4 sm:mt-0 btn bg-blue-600 hover:bg-blue-700 text-white"
         >
           + Add Lab
         </button>
@@ -186,7 +186,7 @@ function Labs() {
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => handleEditClick(lab)}
-                      className="text-violet-500 hover:text-violet-600 font-medium mr-3"
+                      className="text-blue-600 hover:text-blue-700 font-medium mr-3"
                     >
                       Edit
                     </button>
@@ -223,7 +223,7 @@ function Labs() {
                   value={formData.room_number}
                   onChange={handleChange}
                   placeholder="e.g. Room 101"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     modalErrors.room_number
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
@@ -245,7 +245,7 @@ function Labs() {
                   value={formData.totalSeats}
                   onChange={handleChange}
                   placeholder="e.g. 30"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     modalErrors.totalSeats
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
@@ -267,7 +267,7 @@ function Labs() {
                   value={formData.availableSeats}
                   onChange={handleChange}
                   placeholder="e.g. 30"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     modalErrors.availableSeats
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
@@ -294,7 +294,7 @@ function Labs() {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 text-sm rounded-lg bg-violet-500 hover:bg-violet-600 text-white font-medium"
+                className="px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {editingLab ? "Save Changes" : "Save Lab"}
               </button>
