@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-// API point — replace with axios.get('/api/labs/') in useEffect
+// API point - replace with axios.get('/api/labs/') in useEffect
 const labs = [
   { id: 1, room_number: "Room 101", totalSeats: 30, availableSeats: 22 },
   { id: 2, room_number: "Room 203", totalSeats: 30, availableSeats: 1 },
@@ -9,7 +9,7 @@ const labs = [
   { id: 4, room_number: "Room 102", totalSeats: 25, availableSeats: 25 },
 ];
 
-// API point — replace with axios.get('/api/users/') in useEffect
+// API point - replace with axios.get('/api/users/') in useEffect
 const users = [
   {
     id: 1,
@@ -41,7 +41,7 @@ const users = [
   },
 ];
 
-// API point — replace with axios.get('/api/reservations/') in useEffect
+// API point - replace with axios.get('/api/reservations/') in useEffect
 const reservations = [
   {
     id: 1,
@@ -109,7 +109,7 @@ function getStatusBadge(status) {
 
 function Dashboard() {
   // Derive stat numbers from data
-  // API point — in Phase 3 these calculate from real API responses
+  // API point - in Phase 3 these calculate from real API responses
   const totalLabs = labs.length;
   const totalUsers = users.length;
   const activeReservations = reservations.filter(

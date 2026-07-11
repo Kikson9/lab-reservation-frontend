@@ -11,6 +11,7 @@ import Reservations from "./pages/Reservations";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import StudentLayout from "./layouts/StudentLayout";
 import BrowseLabs from "./pages/student/BrowseLabs";
 import MyReservations from "./pages/student/MyReservations";
@@ -33,8 +34,9 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* App pages — wrapped in AppLayout (sidebar + header) */}
+      {/* App pages - wrapped in AppLayout (sidebar + header) */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/labs" element={<Labs />} />
@@ -42,7 +44,7 @@ function App() {
         <Route path="/reservations" element={<Reservations />} />
       </Route>
 
-      {/* Student pages — wrapped in StudentLayout */}
+      {/* Student pages - wrapped in StudentLayout */}
       <Route element={<StudentLayout />}>
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/student/browse-labs" element={<BrowseLabs />} />
@@ -50,7 +52,7 @@ function App() {
         <Route path="/student/book-seat" element={<BookSeat />} />
       </Route>
 
-      {/* Catch all — 404 */}
+      {/* Catch all - 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

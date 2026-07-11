@@ -13,7 +13,7 @@ LabReserve allows university administrators to manage laboratory rooms and stude
 - React (Vite)
 - Tailwind CSS
 - React Router
-- Axios (Phase 3 — API integration)
+- Axios (Phase 3 - API integration)
 
 **Backend**
 
@@ -26,9 +26,9 @@ LabReserve allows university administrators to manage laboratory rooms and stude
 **Admin**
 
 - Dashboard with live stats and lab availability overview
-- Lab management — add, edit, delete lab rooms
-- User management — add, edit, delete users
-- Reservation management — view, filter, cancel reservations
+- Lab management - add, edit, delete lab rooms
+- User management - add, edit, delete users
+- Reservation management - view, filter, cancel reservations
 
 **Student**
 
@@ -39,9 +39,9 @@ LabReserve allows university administrators to manage laboratory rooms and stude
 
 ## Project Status
 
-- Phase 1 — Project setup and structure
-- Phase 2 — Complete UI with static data
-- Phase 3 — API integration with Django backend
+- Phase 1 - Project setup and structure
+- Phase 2 - Complete UI with static data
+- Phase 3 - API integration with Django backend
 
 ## Getting Started
 
@@ -63,5 +63,5 @@ App runs at `to be updated`
 
 ## Team
 
-- Frontend — @Kikson9
-- Backend — @Kb.Ahenkan
+- Frontend - @Kikson9
+- Backend - @Kb.Ahenkan

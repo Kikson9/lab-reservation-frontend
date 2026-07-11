@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ConfirmDialog from "../components/ConfirmDialog";
+import toast from "react-hot-toast";
 
 // Static placeholder data I will replace this with real API data
 
@@ -73,6 +75,16 @@ function Users() {
     studentId: "",
   });
   const [modalErrors, setModalErrors] = useState({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.studentId?.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   function handleAddClick() {
     setEditingUser(null);
@@ -100,8 +112,16 @@ function Users() {
     setModalOpen(true);
   }
 
-  function handleDelete(id) {
-    setUsers(users.filter((user) => user.id !== id));
+  function handleDeleteClick(user) {
+    setUserToDelete(user);
+    setConfirmOpen(true);
+  }
+
+  function handleDeleteConfirm() {
+    setUsers(users.filter((user) => user.id !== userToDelete.id));
+    setConfirmOpen(false);
+    setUserToDelete(null);
+    toast.success("User deleted");
   }
 
   function handleChange(e) {
@@ -150,12 +170,14 @@ function Users() {
           user.id === editingUser.id ? { ...user, ...formData } : user,
         ),
       );
+      toast.success("User updated successfully");
     } else {
       const newUser = {
         id: users.length + 1,
         ...formData,
       };
       setUsers([...users, newUser]);
+      toast.success("User added successfully");
     }
     setModalOpen(false);
   }
@@ -172,12 +194,32 @@ function Users() {
             Manage students and administrators
           </p>
         </div>
-        <button
-          onClick={handleAddClick}
-          className="mt-4 sm:mt-0 btn bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          + Add User
-        </button>
+        <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 w-48"
+            />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              width="14"
+              height="14"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
+            </svg>
+          </div>
+          <button
+            onClick={handleAddClick}
+            className="btn bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            + Add User
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -195,7 +237,7 @@ function Users() {
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
                     {user.name}
@@ -228,7 +270,7 @@ function Users() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => handleDeleteClick(user)}
                       className="text-red-400 hover:text-red-500 font-medium"
                     >
                       Delete
@@ -236,6 +278,16 @@ function Users() {
                   </td>
                 </tr>
               ))}
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm"
+                  >
+                    No users found matching "{searchTerm}"
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -369,6 +421,18 @@ function Users() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete User?"
+        message={`${userToDelete?.name} will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmStyle="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setUserToDelete(null);
+        }}
+      />
     </div>
   );
 }

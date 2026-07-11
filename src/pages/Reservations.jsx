@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 // Static placeholder data I will replace this with real API data
 const labOptions = ["Room 101", "Room 203", "Room 305", "Room 102"];
@@ -14,7 +15,7 @@ const initialReservations = [
     id: 1,
     student: "Daniel Okike",
     lab: "Room 101",
-    date: "2025-05-20",
+    date: "2026-05-20",
     time: "09:00",
     status: "Active",
   },
@@ -22,7 +23,7 @@ const initialReservations = [
     id: 2,
     student: "Adu Ahenkan",
     lab: "Room 203",
-    date: "2025-05-20",
+    date: "2026-05-20",
     time: "11:00",
     status: "Pending",
   },
@@ -30,7 +31,7 @@ const initialReservations = [
     id: 3,
     student: "Sixtus John",
     lab: "Room 305",
-    date: "2025-05-19",
+    date: "2026-05-19",
     time: "14:00",
     status: "Cancelled",
   },
@@ -38,13 +39,13 @@ const initialReservations = [
     id: 4,
     student: "Ben Hassan",
     lab: "Room 102",
-    date: "2025-05-21",
+    date: "2026-05-21",
     time: "08:00",
     status: "Active",
   },
 ];
 
-// Status badge — three possible states this time
+// Status badge - three possible states this time
 function getStatusBadge(status) {
   if (status === "Active") {
     return (
@@ -78,6 +79,14 @@ function Reservations() {
     time: "",
     status: "Pending",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredReservations = reservations.filter(
+    (r) =>
+      r.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.lab.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.status.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   function handleAddClick() {
     setEditingReservation(null);
@@ -103,7 +112,7 @@ function Reservations() {
     setModalOpen(true);
   }
 
-  // Cancel just updates the status — it doesn't delete the record
+  // Cancel just updates the status - it doesn't delete the record
   // This is important: cancelled reservations should still be visible in history
   function handleCancel(id) {
     setReservations(
@@ -111,6 +120,7 @@ function Reservations() {
         r.id === id ? { ...r, status: "Cancelled" } : r,
       ),
     );
+    toast.success("Reservation cancelled");
   }
 
   function handleChange(e) {
@@ -124,12 +134,14 @@ function Reservations() {
           r.id === editingReservation.id ? { ...r, ...formData } : r,
         ),
       );
+      toast.success("Reservation updated");
     } else {
       const newReservation = {
         id: reservations.length + 1,
         ...formData,
       };
       setReservations([...reservations, newReservation]);
+      toast.success("Reservation created");
     }
     setModalOpen(false);
   }
@@ -146,12 +158,32 @@ function Reservations() {
             View and manage all lab reservations
           </p>
         </div>
-        <button
-          onClick={handleAddClick}
-          className="mt-4 sm:mt-0 btn bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          + New Reservation
-        </button>
+        <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search reservations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 w-56"
+            />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              width="14"
+              height="14"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
+            </svg>
+          </div>
+          <button
+            onClick={handleAddClick}
+            className="btn bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            + New Reservation
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -169,7 +201,7 @@ function Reservations() {
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-              {reservations.map((r) => (
+              {filteredReservations.map((r) => (
                 <tr key={r.id}>
                   <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
                     {r.student}
@@ -207,6 +239,16 @@ function Reservations() {
                   </td>
                 </tr>
               ))}
+              {filteredReservations.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm"
+                  >
+                    No reservations found matching "{searchTerm}"
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -327,5 +369,3 @@ function Reservations() {
 }
 
 export default Reservations;
-
-// yeah but walk me through it slowly and explain any new concepts and guide me as we move on well. anything you think i may find new or hard explain well

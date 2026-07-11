@@ -74,7 +74,7 @@ function Signup() {
     }
     setErrors({});
     setLoading(true);
-    // API POINT — replace with Axios POST to Django register endpoint
+    // API POINT - replace with Axios POST to Django register endpoint
     console.log("Signup attempt:", formData);
     setLoading(false);
   }
@@ -111,11 +111,13 @@ function Signup() {
   );
 
   const inputClass = (field) =>
-    `w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white dark:focus:bg-gray-700 transition-all ${errors[field] ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`;
+    `w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all ${
+      errors[field] ? "border-red-400" : "border-gray-200"
+    }`;
 
   return (
     <div className="min-h-screen flex">
-      {/* LEFT PANEL — identical to Login */}
+      {/* LEFT PANEL - identical to Login */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0F172A] relative overflow-hidden flex-col p-11">
         <div
           className="absolute inset-0"
@@ -336,14 +338,11 @@ function Signup() {
               Manage your reservations
             </li>
           </ul>
-          <p className="text-slate-700 text-[10px]">
-            © 2025 University Lab Management System
-          </p>
         </div>
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 px-6 py-10 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center bg-white px-6 py-10 overflow-y-auto">
         <div className="w-full max-w-[330px] py-6">
           <div className="lg:hidden text-center mb-8">
             <h1 className="text-2xl font-extrabold text-blue-600">
@@ -351,7 +350,7 @@ function Signup() {
             </h1>
           </div>
 
-          <h2 className="text-[23px] font-bold text-gray-900 dark:text-gray-100 mb-1 tracking-tight">
+          <h2 className="text-[23px] font-bold text-gray-900 mb-1 tracking-tight">
             Create your account
           </h2>
           <p className="text-gray-400 text-sm mb-7">
@@ -361,7 +360,7 @@ function Signup() {
           <div className="space-y-4">
             {/* Name */}
             <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                 Full Name
               </label>
               <input
@@ -379,7 +378,7 @@ function Signup() {
 
             {/* Email */}
             <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                 Email address
               </label>
               <input
@@ -397,14 +396,14 @@ function Signup() {
 
             {/* Role */}
             <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                 Role
               </label>
               <select
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 dark:border-gray-700 rounded-[9px] text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 transition-all"
+                className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 transition-all"
               >
                 <option value="Student">Student</option>
                 <option value="Admin">Admin</option>
@@ -414,7 +413,7 @@ function Signup() {
             {/* Student ID */}
             {formData.role === "Student" && (
               <div>
-                <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                   Student ID
                 </label>
                 <input
@@ -435,7 +434,7 @@ function Signup() {
 
             {/* Password */}
             <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -457,13 +456,19 @@ function Signup() {
               </div>
               {passwordStrength && (
                 <div className="mt-2">
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.width}`}
                     />
                   </div>
                   <p
-                    className={`text-xs mt-1 ${passwordStrength.label === "Weak" ? "text-red-400" : passwordStrength.label === "Fair" ? "text-yellow-400" : "text-green-400"}`}
+                    className={`text-xs mt-1 ${
+                      passwordStrength.label === "Weak"
+                        ? "text-red-400"
+                        : passwordStrength.label === "Fair"
+                          ? "text-yellow-400"
+                          : "text-green-400"
+                    }`}
                   >
                     {passwordStrength.label} password
                   </p>
@@ -476,7 +481,7 @@ function Signup() {
 
             {/* Confirm password */}
             <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                 Confirm Password
               </label>
               <div className="relative">
@@ -538,7 +543,7 @@ function Signup() {
             </button>
           </div>
 
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+          <p className="text-center text-sm text-gray-500 mt-6">
             Already have an account?{" "}
             <Link
               to="/login"

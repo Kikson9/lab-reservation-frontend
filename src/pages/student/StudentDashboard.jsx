@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-// API point — replace with axios.get('/api/reservations/my/') in useEffect
+// API point - replace with axios.get('/api/reservations/my/') in useEffect
 const myReservations = [
   {
     id: 1,
@@ -50,7 +50,7 @@ function getStatusBadge(status) {
 
 function StudentDashboard() {
   // Derive stats directly from the data
-  // API point — in Phase 3 these calculate from real API response
+  // API point - in Phase 3 these calculate from real API response
   const activeCount = myReservations.filter(
     (r) => r.status === "Active",
   ).length;
@@ -71,7 +71,13 @@ function StudentDashboard() {
         <div>
           {/* Phase 3: replace "Student" with real logged in user's name */}
           <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">
-            Welcome back, Student
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour < 12) return "Good morning";
+              if (hour < 17) return "Good afternoon";
+              return "Good evening";
+            })()}
+            , Student
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Here's a summary of your lab activity

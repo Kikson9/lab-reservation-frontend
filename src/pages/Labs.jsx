@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ConfirmDialog from "../components/ConfirmDialog";
+import toast from "react-hot-toast";
 
 // Static placeholder data I will replace this with real API data
 
@@ -42,6 +44,13 @@ function Labs() {
     availableSeats: "",
   });
   const [modalErrors, setModalErrors] = useState({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [labToDelete, setLabToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredLabs = labs.filter((lab) =>
+    lab.room_number.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   // Open modal for adding a new lab
   function handleAddClick() {
@@ -64,8 +73,16 @@ function Labs() {
   }
 
   // Delete a lab by id
-  function handleDelete(id) {
-    setLabs(labs.filter((lab) => lab.id !== id));
+  function handleDeleteClick(lab) {
+    setLabToDelete(lab);
+    setConfirmOpen(true);
+  }
+
+  function handleDeleteConfirm() {
+    setLabs(labs.filter((lab) => lab.id !== labToDelete.id));
+    setConfirmOpen(false);
+    setLabToDelete(null);
+    toast.success("Lab deleted");
   }
 
   // Handle form input changes
@@ -120,6 +137,7 @@ function Labs() {
             : lab,
         ),
       );
+      toast.success("Lab updated successfully");
     } else {
       const newLab = {
         id: labs.length + 1,
@@ -128,6 +146,7 @@ function Labs() {
         availableSeats: Number(formData.availableSeats),
       };
       setLabs([...labs, newLab]);
+      toast.success("Lab added successfully");
     }
     setModalOpen(false);
   }
@@ -144,14 +163,35 @@ function Labs() {
             Manage your laboratory rooms
           </p>
         </div>
-        <button
-          onClick={handleAddClick}
-          className="mt-4 sm:mt-0 btn bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          + Add Lab
-        </button>
+        <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          {/* Search input */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search labs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 w-48"
+            />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              width="14"
+              height="14"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
+            </svg>
+          </div>
+          {/* Add button */}
+          <button
+            onClick={handleAddClick}
+            className="btn bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            + Add Lab
+          </button>
+        </div>
       </div>
-
       {/* Table */}
       <div className="bg-white dark:bg-gray-800 shadow-xs rounded-xl">
         <div className="overflow-x-auto">
@@ -169,7 +209,7 @@ function Labs() {
 
             {/* Table body */}
             <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-              {labs.map((lab) => (
+              {filteredLabs.map((lab) => (
                 <tr key={lab.id}>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {lab.room_number}
@@ -191,7 +231,7 @@ function Labs() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(lab.id)}
+                      onClick={() => handleDeleteClick(lab)}
                       className="text-red-400 hover:text-red-500 font-medium"
                     >
                       Delete
@@ -199,11 +239,20 @@ function Labs() {
                   </td>
                 </tr>
               ))}
+              {filteredLabs.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm"
+                  >
+                    No labs found matching "{searchTerm}"
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center">
@@ -302,6 +351,18 @@ function Labs() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete Lab?"
+        message={`${labToDelete?.room_number} will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmStyle="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setLabToDelete(null);
+        }}
+      />
     </div>
   );
 }

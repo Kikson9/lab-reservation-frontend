@@ -1,11 +1,27 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+function getPasswordStrength(password) {
+  if (password.length === 0) return null;
+  if (password.length < 6)
+    return { label: "Weak", color: "bg-red-400", width: "w-1/3" };
+  if (password.length < 10)
+    return { label: "Fair", color: "bg-yellow-400", width: "w-2/3" };
+  return { label: "Strong", color: "bg-green-400", width: "w-full" };
+}
+
+function ResetPassword() {
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const passwordStrength = getPasswordStrength(formData.password);
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,16 +32,15 @@ function Login() {
 
   function validate() {
     const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email) {
-      newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address.";
-    }
     if (!formData.password) {
       newErrors.password = "Password is required.";
     } else if (formData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters.";
+    }
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password.";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
     }
     return newErrors;
   }
@@ -38,16 +53,56 @@ function Login() {
     }
     setErrors({});
     setLoading(true);
-    // API POINT - replace with Axios POST to Django auth endpoint
-    console.log("Login attempt:", formData);
+    // API POINT - replace with:
+    // const token = new URLSearchParams(window.location.search).get('token');
+    // axios.post('/api/auth/reset-password/', { token, password: formData.password })
+    //   .then(() => setSubmitted(true))
+    //   .catch(() => setErrors({ password: 'Reset link is invalid or has expired.' }))
+    console.log("Password reset submitted:", formData.password);
     setLoading(false);
+    setSubmitted(true);
   }
+
+  const eyeOff = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="currentColor"
+      viewBox="0 0 16 16"
+    >
+      <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z" />
+      <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z" />
+      <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709z" />
+      <path
+        fillRule="evenodd"
+        d="M13.646 14.354l-12-12 .708-.708 12 12-.708.708z"
+      />
+    </svg>
+  );
+
+  const eyeOn = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="currentColor"
+      viewBox="0 0 16 16"
+    >
+      <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z" />
+      <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
+    </svg>
+  );
+
+  const inputClass = (field) =>
+    `w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all ${
+      errors[field] ? "border-red-400" : "border-gray-200"
+    }`;
 
   return (
     <div className="min-h-screen flex">
-      {/* LEFT PANEL */}
+      {/* LEFT PANEL - same as other auth pages */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0F172A] relative overflow-hidden flex-col p-11">
-        {/* Dot grid */}
         <div
           className="absolute inset-0"
           style={{
@@ -56,7 +111,6 @@ function Login() {
             backgroundSize: "26px 26px",
           }}
         />
-        {/* Fade overlay */}
         <div
           className="absolute inset-0"
           style={{
@@ -65,7 +119,7 @@ function Login() {
           }}
         />
 
-        {/* Glowing nodes - 5 spread across */}
+        {/* Glowing nodes */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute" style={{ top: "11%", left: "60%" }}>
             <div className="relative">
@@ -126,7 +180,7 @@ function Login() {
           </div>
         </div>
 
-        {/* Floating card 1 - top right, clear of headline */}
+        {/* Floating cards */}
         <div
           className="absolute z-20"
           style={{
@@ -160,7 +214,6 @@ function Login() {
           </div>
         </div>
 
-        {/* Floating card 2 - bottom left, clear of features */}
         <div
           className="absolute z-20"
           style={{
@@ -205,7 +258,7 @@ function Login() {
           </div>
         </div>
 
-        {/* Top - logo */}
+        {/* Logo */}
         <div className="relative z-10">
           <h1 className="text-2xl font-extrabold text-white tracking-tight">
             LabReserve
@@ -215,19 +268,19 @@ function Login() {
           </p>
         </div>
 
-        {/* Middle - headline, vertically centered */}
+        {/* Headline */}
         <div className="relative z-10 my-auto">
           <h2 className="text-[27px] font-bold text-white leading-tight tracking-tight mb-3">
-            Reserve your lab
+            Almost there.
             <br />
-            seat in <span className="text-blue-600">seconds.</span>
+            <span className="text-blue-600">Set your new password.</span>
           </h2>
           <p className="text-slate-400 text-sm leading-relaxed max-w-[280px]">
-            The smart way to manage university lab reservations.
+            Choose a strong password to keep your account secure.
           </p>
         </div>
 
-        {/* Bottom - features + copyright */}
+        {/* Features */}
         <div className="relative z-10">
           <ul className="space-y-2.5 mb-6">
             <li className="flex items-center gap-2.5 text-slate-300 text-[12.5px]">
@@ -286,154 +339,175 @@ function Login() {
             </h1>
           </div>
 
-          <h2 className="text-[23px] font-bold text-gray-900 mb-1 tracking-tight">
-            Welcome back
-          </h2>
-          <p className="text-gray-400 text-sm mb-8">
-            Sign in to your account to continue
-          </p>
-
-          <div className="space-y-4">
-            {/* Email */}
-            <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
-                Email address
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@university.edu"
-                className={`w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all ${
-                  errors.email ? "border-red-400" : "border-gray-200"
-                }`}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1.5">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className={`w-full px-3.5 py-2.5 pr-10 border-[1.5px] rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all ${
-                    errors.password ? "border-red-400" : "border-gray-200"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          {submitted ? (
+            /* Success state */
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="28"
+                  height="28"
+                  fill="currentColor"
+                  className="text-green-500"
+                  viewBox="0 0 16 16"
                 >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      viewBox="0 0 16 16"
+                  <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                Password reset successful
+              </h2>
+              <p className="text-gray-400 text-sm mb-6">
+                Your password has been updated. You can now sign in with your
+                new password.
+              </p>
+              <Link
+                to="/login"
+                className="inline-block w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-[9px] transition-all duration-150 hover:shadow-lg hover:shadow-blue-600/25 text-center"
+              >
+                Back to Login
+              </Link>
+            </div>
+          ) : (
+            /* Form state */
+            <>
+              <h2 className="text-[23px] font-bold text-gray-900 mb-1 tracking-tight">
+                Reset your password
+              </h2>
+              <p className="text-gray-400 text-sm mb-8">
+                Enter your new password below
+              </p>
+
+              <div className="space-y-4">
+                {/* New password */}
+                <div>
+                  <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      className={inputClass("password") + " pr-10"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z" />
-                      <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z" />
-                      <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709z" />
-                      <path
-                        fillRule="evenodd"
-                        d="M13.646 14.354l-12-12 .708-.708 12 12-.708.708z"
-                      />
-                    </svg>
+                      {showPassword ? eyeOff : eyeOn}
+                    </button>
+                  </div>
+                  {passwordStrength && (
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.width}`}
+                        />
+                      </div>
+                      <p
+                        className={`text-xs mt-1 ${
+                          passwordStrength.label === "Weak"
+                            ? "text-red-400"
+                            : passwordStrength.label === "Fair"
+                              ? "text-yellow-400"
+                              : "text-green-400"
+                        }`}
+                      >
+                        {passwordStrength.label} password
+                      </p>
+                    </div>
+                  )}
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm password */}
+                <div>
+                  <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      className={inputClass("confirmPassword") + " pr-10"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showConfirmPassword ? eyeOff : eyeOn}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-[9px] transition-all duration-150 hover:shadow-lg hover:shadow-blue-600/25 hover:-translate-y-px"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg
+                        className="animate-spin h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                        />
+                      </svg>
+                      Resetting...
+                    </span>
                   ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z" />
-                      <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
-                    </svg>
+                    "Reset Password"
                   )}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1.5">{errors.password}</p>
-              )}
-              <div className="text-right mt-2">
+
+              <p className="text-center text-sm text-gray-500 mt-6">
+                Remember your password?{" "}
                 <Link
-                  to="/forgot-password"
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  to="/login"
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
-                  Forgot password?
+                  Sign in
                 </Link>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-[9px] transition-all duration-150 hover:shadow-lg hover:shadow-blue-600/25 hover:-translate-y-px mt-2"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg
-                    className="animate-spin h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                "Sign In"
-              )}
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-
-          {/* Signup */}
-          <p className="text-center text-sm text-gray-500">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-blue-600 hover:text-blue-700 font-semibold"
-            >
-              Create one
-            </Link>
-          </p>
+              </p>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Animations */}
       <style>{`
         @keyframes lf1 { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-9px) rotate(0deg); } }
         @keyframes lf2 { 0%,100% { transform: translateY(0) rotate(1.5deg); } 50% { transform: translateY(-11px) rotate(0deg); } }
@@ -442,4 +516,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default ResetPassword;

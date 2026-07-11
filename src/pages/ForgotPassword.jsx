@@ -19,7 +19,7 @@ function ForgotPassword() {
     }
     setError("");
     setLoading(true);
-    // API POINT — POST email to Django password reset endpoint
+    // API POINT - POST email to Django password reset endpoint
     console.log("Password reset requested for:", email);
     setLoading(false);
     setSubmitted(true);
@@ -27,7 +27,7 @@ function ForgotPassword() {
 
   return (
     <div className="min-h-screen flex">
-      {/* LEFT PANEL — identical to Login and Signup */}
+      {/* LEFT PANEL - identical to Login and Signup */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0F172A] relative overflow-hidden flex-col p-11">
         <div
           className="absolute inset-0"
@@ -253,14 +253,11 @@ function ForgotPassword() {
               Manage your reservations
             </li>
           </ul>
-          <p className="text-slate-700 text-[10px]">
-            © 2025 University Lab Management System
-          </p>
         </div>
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 px-6 py-12">
+      <div className="flex-1 flex items-center justify-center bg-white px-6 py-12">
         <div className="w-full max-w-[330px]">
           <div className="lg:hidden text-center mb-8">
             <h1 className="text-2xl font-extrabold text-blue-600">
@@ -271,7 +268,7 @@ function ForgotPassword() {
           {submitted ? (
             /* Success state */
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-5">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="28"
@@ -283,13 +280,13 @@ function ForgotPassword() {
                   <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
                 Check your email
               </h2>
               <p className="text-gray-400 text-sm mb-2">
                 We've sent a reset link to
               </p>
-              <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm mb-6">
+              <p className="font-semibold text-gray-700 text-sm mb-6">
                 {email}
               </p>
               <Link
@@ -302,7 +299,7 @@ function ForgotPassword() {
           ) : (
             /* Form state */
             <>
-              <h2 className="text-[23px] font-bold text-gray-900 dark:text-gray-100 mb-1 tracking-tight">
+              <h2 className="text-[23px] font-bold text-gray-900 mb-1 tracking-tight">
                 Forgot password?
               </h2>
               <p className="text-gray-400 text-sm mb-8">
@@ -311,7 +308,7 @@ function ForgotPassword() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[12.5px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
                     Email address
                   </label>
                   <input
@@ -322,10 +319,8 @@ function ForgotPassword() {
                       if (error) setError("");
                     }}
                     placeholder="you@university.edu"
-                    className={`w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white dark:focus:bg-gray-700 transition-all ${
-                      error
-                        ? "border-red-400"
-                        : "border-gray-200 dark:border-gray-700"
+                    className={`w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all ${
+                      error ? "border-red-400" : "border-gray-200"
                     }`}
                   />
                   {error && (
@@ -367,7 +362,7 @@ function ForgotPassword() {
                 </button>
               </div>
 
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+              <p className="text-center text-sm text-gray-500 mt-6">
                 Remember your password?{" "}
                 <Link
                   to="/login"
