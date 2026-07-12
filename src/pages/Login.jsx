@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../axios";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -38,9 +41,25 @@ function Login() {
     }
     setErrors({});
     setLoading(true);
-    // API POINT - replace with Axios POST to Django auth endpoint
+
+    api
+      .post("/auth/login/", {
+        email: formData.email,
+        password: formData.password,
+      })
+      .then((response) => {
+        const { token, user } = response.data;
+        login(user, token);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error.response && error.response.data.error) {
+          setErrors({ password: error.response.data.error });
+        } else {
+          setErrors({ password: "Something went wrong. Please try again." });
+        }
+      });
     console.log("Login attempt:", formData);
-    setLoading(false);
   }
 
   return (

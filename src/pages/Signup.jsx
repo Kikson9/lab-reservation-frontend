@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import api from "../axios";
 
 function getPasswordStrength(password) {
   if (password.length === 0) return null;
@@ -11,6 +13,8 @@ function getPasswordStrength(password) {
 }
 
 function Signup() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -74,9 +78,29 @@ function Signup() {
     }
     setErrors({});
     setLoading(true);
-    // API POINT - replace with Axios POST to Django register endpoint
+
+    api
+      .post("/auth/signup/", {
+        full_name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirm_password: formData.confirmPassword,
+        role: formData.role,
+        student_id: formData.studentId,
+      })
+      .then(() => {
+        setLoading(false);
+        navigate("/login");
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error.response && error.response.data.error) {
+          setErrors({ email: error.response.data.error });
+        } else {
+          setErrors({ email: "Something went wrong. Please try again." });
+        }
+      });
     console.log("Signup attempt:", formData);
-    setLoading(false);
   }
 
   const eyeOff = (
