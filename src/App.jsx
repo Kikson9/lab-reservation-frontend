@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 
 import "./css/style.css";
 
@@ -29,32 +30,34 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <Routes>
-      {/* Auth pages */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+    <AuthProvider>
+      <Routes>
+        {/* Auth pages */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* App pages - wrapped in AppLayout (sidebar + header) */}
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/labs" element={<Labs />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/reservations" element={<Reservations />} />
-      </Route>
+        {/* App pages - wrapped in AppLayout (sidebar + header) */}
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/labs" element={<Labs />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/reservations" element={<Reservations />} />
+        </Route>
 
-      {/* Student pages - wrapped in StudentLayout */}
-      <Route element={<StudentLayout />}>
-        <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/browse-labs" element={<BrowseLabs />} />
-        <Route path="/student/my-reservations" element={<MyReservations />} />
-        <Route path="/student/book-seat" element={<BookSeat />} />
-      </Route>
+        {/* Student pages - wrapped in StudentLayout */}
+        <Route element={<StudentLayout />}>
+          <Route path="/student" element={<StudentDashboard />} />
+          <Route path="/student/browse-labs" element={<BrowseLabs />} />
+          <Route path="/student/my-reservations" element={<MyReservations />} />
+          <Route path="/student/book-seat" element={<BookSeat />} />
+        </Route>
 
-      {/* Catch all - 404 */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Catch all - 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
