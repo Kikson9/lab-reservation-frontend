@@ -100,7 +100,6 @@ function Signup() {
           setErrors({ email: "Something went wrong. Please try again." });
         }
       });
-    console.log("Signup attempt:", formData);
   }
 
   const eyeOff = (

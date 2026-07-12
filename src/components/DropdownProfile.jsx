@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Transition from "../utils/Transition";
 import UserAvatar from "../images/user-avatar-32.png";
+import { useAuth } from "../context/AuthContext";
 
 function DropdownProfile({ align }) {
+  const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef(null);
@@ -53,9 +55,8 @@ function DropdownProfile({ align }) {
           alt="User avatar"
         />
         <div className="flex items-center truncate">
-          {/* Phase 3: replace "Admin User" with the real logged in user's name */}
           <span className="truncate ml-2 text-sm font-medium text-gray-600 dark:text-gray-100 group-hover:text-gray-800 dark:group-hover:text-white">
-            Admin User
+            {user?.full_name || "User"}
           </span>
           <svg
             className="w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500"
@@ -88,25 +89,25 @@ function DropdownProfile({ align }) {
           <div className="pt-0.5 pb-2 px-3 mb-1 border-b border-gray-200 dark:border-gray-700/60">
             {/* Phase 3: replace with real user name and role from auth */}
             <div className="font-medium text-gray-800 dark:text-gray-100">
-              Admin User
+              {user?.full_name}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-              Administrator
+              {user?.role}
             </div>
           </div>
 
           {/* Links */}
-          <ul>
-            <li>
-              <Link
-                className="font-medium text-sm text-blue-600 hover:text-blue-700 dark:hover:text-blue-500 flex items-center py-1 px-3"
-                to="/login"
-                onClick={() => setDropdownOpen(false)}
-              >
-                Sign Out
-              </Link>
-            </li>
-          </ul>
+          <div className="pt-1">
+            <button
+              onClick={() => {
+                setDropdownOpen(false);
+                logout();
+              }}
+              className="w-full text-left font-medium text-sm text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 flex items-center py-1 px-3"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </Transition>
     </div>

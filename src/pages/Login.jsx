@@ -59,7 +59,6 @@ function Login() {
           setErrors({ password: "Something went wrong. Please try again." });
         }
       });
-    console.log("Login attempt:", formData);
   }
 
   return (
