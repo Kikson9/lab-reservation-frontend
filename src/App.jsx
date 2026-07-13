@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import "./css/style.css";
 
@@ -38,20 +39,29 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* App pages - wrapped in AppLayout (sidebar + header) */}
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/labs" element={<Labs />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/reservations" element={<Reservations />} />
+        {/* Admin pages - protected */}
+        <Route element={<ProtectedRoute allowedRole="Admin" />}>
+          {/* App pages - wrapped in AppLayout (sidebar + header) */}
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/labs" element={<Labs />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/reservations" element={<Reservations />} />
+          </Route>
         </Route>
 
-        {/* Student pages - wrapped in StudentLayout */}
-        <Route element={<StudentLayout />}>
-          <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/student/browse-labs" element={<BrowseLabs />} />
-          <Route path="/student/my-reservations" element={<MyReservations />} />
-          <Route path="/student/book-seat" element={<BookSeat />} />
+        {/* Student pages - protected */}
+        <Route element={<ProtectedRoute allowedRole="Student" />}>
+          {/* Student pages - wrapped in StudentLayout */}
+          <Route element={<StudentLayout />}>
+            <Route path="/student" element={<StudentDashboard />} />
+            <Route path="/student/browse-labs" element={<BrowseLabs />} />
+            <Route
+              path="/student/my-reservations"
+              element={<MyReservations />}
+            />
+            <Route path="/student/book-seat" element={<BookSeat />} />
+          </Route>
         </Route>
 
         {/* Catch all - 404 */}
