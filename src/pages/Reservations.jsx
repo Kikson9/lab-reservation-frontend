@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import api from "../axios";
 
+/*
 // Static placeholder data I will replace this with real API data
 const labOptions = ["Room 101", "Room 203", "Room 305", "Room 102"];
 const userOptions = [
@@ -44,13 +46,13 @@ const initialReservations = [
     status: "Active",
   },
 ];
+*/
 
-// Status badge - three possible states this time
 function getStatusBadge(status) {
-  if (status === "Active") {
+  if (status === "Confirmed") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
-        Active
+        Confirmed
       </span>
     );
   } else if (status === "Pending") {
@@ -69,81 +71,183 @@ function getStatusBadge(status) {
 }
 
 function Reservations() {
-  const [reservations, setReservations] = useState(initialReservations);
+  const [reservations, setReservations] = useState([]);
+  const [labs, setLabs] = useState([]);
+  const [users, setUsers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingReservation, setEditingReservation] = useState(null);
   const [formData, setFormData] = useState({
-    student: userOptions[0],
-    lab: labOptions[0],
-    date: "",
-    time: "",
+    user: "",
+    lab: "",
+    reservation_date: "",
+    reservation_time: "",
     status: "Pending",
   });
+  const [modalErrors, setModalErrors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Search filter - matches against Django's returned field names
   const filteredReservations = reservations.filter(
     (r) =>
-      r.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.lab.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.lab_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.status.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  useEffect(() => {
+    fetchReservations();
+    fetchLabs();
+    fetchUsers();
+  }, []);
+
+  function fetchReservations() {
+    api
+      .get("/reservations/")
+      .then((response) => {
+        setReservations(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load reservations");
+      });
+  }
+
+  function fetchLabs() {
+    api
+      .get("/labs/")
+      .then((response) => {
+        setLabs(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load labs");
+      });
+  }
+
+  function fetchUsers() {
+    api
+      .get("/users/")
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load users");
+      });
+  }
 
   function handleAddClick() {
     setEditingReservation(null);
     setFormData({
-      student: userOptions[0],
-      lab: labOptions[0],
-      date: "",
-      time: "",
+      user: users[0]?.id || "",
+      lab: labs[0]?.id || "",
+      reservation_date: "",
+      reservation_time: "",
       status: "Pending",
     });
+    setModalErrors({});
     setModalOpen(true);
   }
 
   function handleEditClick(reservation) {
     setEditingReservation(reservation);
     setFormData({
-      student: reservation.student,
+      user: reservation.user,
       lab: reservation.lab,
-      date: reservation.date,
-      time: reservation.time,
+      reservation_date: "",
+      reservation_time: "",
       status: reservation.status,
     });
+    setModalErrors({});
     setModalOpen(true);
   }
 
-  // Cancel just updates the status - it doesn't delete the record
-  // This is important: cancelled reservations should still be visible in history
+  // Cancel updates status to Cancelled via the API
+  // Doesn't delete the record - cancelled reservations stay visible in history
   function handleCancel(id) {
-    setReservations(
-      reservations.map((r) =>
-        r.id === id ? { ...r, status: "Cancelled" } : r,
-      ),
-    );
-    toast.success("Reservation cancelled");
+    api
+      .patch(`/reservations/${id}/`, { status: "Cancelled" })
+      .then(() => {
+        toast.success("Reservation cancelled");
+        fetchReservations();
+        fetchLabs();
+      })
+      .catch(() => {
+        toast.error("Failed to cancel reservation");
+      });
   }
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (modalErrors[e.target.name]) {
+      setModalErrors({ ...modalErrors, [e.target.name]: "" });
+    }
+  }
+
+  function validate() {
+    const newErrors = {};
+
+    if (!formData.user) {
+      newErrors.user = "Please select a student.";
+    }
+
+    if (!formData.lab) {
+      newErrors.lab = "Please select a lab.";
+    }
+
+    if (!formData.reservation_date) {
+      newErrors.reservation_date = "Please select a date.";
+    }
+
+    if (!formData.reservation_time) {
+      newErrors.reservation_time = "Please select a time.";
+    }
+
+    return newErrors;
   }
 
   function handleSave() {
-    if (editingReservation) {
-      setReservations(
-        reservations.map((r) =>
-          r.id === editingReservation.id ? { ...r, ...formData } : r,
-        ),
-      );
-      toast.success("Reservation updated");
-    } else {
-      const newReservation = {
-        id: reservations.length + 1,
-        ...formData,
-      };
-      setReservations([...reservations, newReservation]);
-      toast.success("Reservation created");
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setModalErrors(validationErrors);
+      return;
     }
-    setModalOpen(false);
+    setModalErrors({});
+
+    // Combining date and time into one ISO datetime string
+    const isoDateTime = `${formData.reservation_date}T${formData.reservation_time}:00`;
+
+    const payload = {
+      user: formData.user,
+      lab: formData.lab,
+      reservation_date: isoDateTime,
+      status: formData.status,
+    };
+
+    if (editingReservation) {
+      api
+        .put(`/reservations/${editingReservation.id}/`, payload)
+        .then(() => {
+          toast.success("Reservation updated");
+          fetchReservations();
+          setModalOpen(false);
+        })
+        .catch((error) => {
+          const errorMsg =
+            error.response?.data?.error || "Failed to update reservation";
+          toast.error(errorMsg);
+        });
+    } else {
+      api
+        .post("/reservations/", payload)
+        .then(() => {
+          toast.success("Reservation created");
+          fetchReservations();
+          fetchLabs(); // refresh labs since available_seats changed
+          setModalOpen(false);
+        })
+        .catch((error) => {
+          const errorMsg =
+            error.response?.data?.error || "Failed to create reservation";
+          toast.error(errorMsg);
+        });
+    }
   }
 
   return (
@@ -204,16 +308,16 @@ function Reservations() {
               {filteredReservations.map((r) => (
                 <tr key={r.id}>
                   <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
-                    {r.student}
+                    {r.user_name}
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {r.lab}
+                    {r.lab_name}
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {r.date}
+                    {r.reservation_date}
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {r.time}
+                    {r.reservation_time}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {getStatusBadge(r.status)}
@@ -245,7 +349,9 @@ function Reservations() {
                     colSpan="6"
                     className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm"
                   >
-                    No reservations found matching "{searchTerm}"
+                    {searchTerm
+                      ? `No reservations found matching "${searchTerm}"`
+                      : 'No reservations yet. Click "+ New Reservation" to create one.'}
                   </td>
                 </tr>
               )}
@@ -263,26 +369,36 @@ function Reservations() {
             </h2>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Student dropdown */}
+              {/* Student dropdown - real users from the database */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                   Student
                 </label>
                 <select
-                  name="student"
-                  value={formData.student}
+                  name="user"
+                  value={formData.user}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                    modalErrors.user
+                      ? "border-red-400"
+                      : "border-gray-200 dark:border-gray-700"
+                  }`}
                 >
-                  {userOptions.map((user) => (
-                    <option key={user} value={user}>
-                      {user}
+                  <option value="">Select a student</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.first_name}
                     </option>
                   ))}
                 </select>
+                {modalErrors.user && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {modalErrors.user}
+                  </p>
+                )}
               </div>
 
-              {/* Lab dropdown */}
+              {/* Lab dropdown - real labs from the database */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                   Lab
@@ -291,14 +407,22 @@ function Reservations() {
                   name="lab"
                   value={formData.lab}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                    modalErrors.lab
+                      ? "border-red-400"
+                      : "border-gray-200 dark:border-gray-700"
+                  }`}
                 >
-                  {labOptions.map((lab) => (
-                    <option key={lab} value={lab}>
-                      {lab}
+                  <option value="">Select a lab</option>
+                  {labs.map((lab) => (
+                    <option key={lab.id} value={lab.id}>
+                      Room {lab.room_number}
                     </option>
                   ))}
                 </select>
+                {modalErrors.lab && (
+                  <p className="text-red-500 text-xs mt-1">{modalErrors.lab}</p>
+                )}
               </div>
 
               {/* Date */}
@@ -308,11 +432,20 @@ function Reservations() {
                 </label>
                 <input
                   type="date"
-                  name="date"
-                  value={formData.date}
+                  name="reservation_date"
+                  value={formData.reservation_date}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                    modalErrors.reservation_date
+                      ? "border-red-400"
+                      : "border-gray-200 dark:border-gray-700"
+                  }`}
                 />
+                {modalErrors.reservation_date && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {modalErrors.reservation_date}
+                  </p>
+                )}
               </div>
 
               {/* Time */}
@@ -322,11 +455,20 @@ function Reservations() {
                 </label>
                 <input
                   type="time"
-                  name="time"
-                  value={formData.time}
+                  name="reservation_time"
+                  value={formData.reservation_time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                    modalErrors.reservation_time
+                      ? "border-red-400"
+                      : "border-gray-200 dark:border-gray-700"
+                  }`}
                 />
+                {modalErrors.reservation_time && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {modalErrors.reservation_time}
+                  </p>
+                )}
               </div>
 
               {/* Status */}
@@ -341,7 +483,7 @@ function Reservations() {
                   className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
                   <option value="Pending">Pending</option>
-                  <option value="Active">Active</option>
+                  <option value="Confirmed">Confirmed</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
