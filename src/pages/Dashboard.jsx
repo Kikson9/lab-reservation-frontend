@@ -1,95 +1,14 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-// API point - replace with axios.get('/api/labs/') in useEffect
-const labs = [
-  { id: 1, room_number: "Room 101", totalSeats: 30, availableSeats: 22 },
-  { id: 2, room_number: "Room 203", totalSeats: 30, availableSeats: 1 },
-  { id: 3, room_number: "Room 305", totalSeats: 40, availableSeats: 0 },
-  { id: 4, room_number: "Room 102", totalSeats: 25, availableSeats: 25 },
-];
-
-// API point - replace with axios.get('/api/users/') in useEffect
-const users = [
-  {
-    id: 1,
-    name: "Daniel Okike",
-    email: "daniel@university.edu",
-    role: "Student",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Adu Ahenkan",
-    email: "adu@university.edu",
-    role: "Student",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Sixtus John",
-    email: "sixtus@university.edu",
-    role: "Admin",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Ben Hassan",
-    email: "ben@university.edu",
-    role: "Student",
-    status: "Inactive",
-  },
-];
-
-// API point - replace with axios.get('/api/reservations/') in useEffect
-const reservations = [
-  {
-    id: 1,
-    student: "Daniel Okike",
-    lab: "Room 101",
-    date: "2025-05-20",
-    time: "09:00",
-    status: "Active",
-  },
-  {
-    id: 2,
-    student: "Adu Ahenkan",
-    lab: "Room 203",
-    date: "2025-05-20",
-    time: "11:00",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    student: "Sixtus John",
-    lab: "Room 305",
-    date: "2025-05-19",
-    time: "14:00",
-    status: "Cancelled",
-  },
-  {
-    id: 4,
-    student: "Ben Hassan",
-    lab: "Room 102",
-    date: "2025-05-21",
-    time: "08:00",
-    status: "Active",
-  },
-  {
-    id: 5,
-    student: "Daniel Okike",
-    lab: "Room 101",
-    date: "2025-05-22",
-    time: "10:00",
-    status: "Pending",
-  },
-];
+import api from "../axios";
+import toast from "react-hot-toast";
 
 function getStatusBadge(status) {
-  if (status === "Active") {
+  if (status === "Confirmed") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
-        Active
+        Confirmed
       </span>
     );
   } else if (status === "Pending") {
@@ -108,14 +27,53 @@ function getStatusBadge(status) {
 }
 
 function Dashboard() {
-  // Derive stat numbers from data
-  // API point - in Phase 3 these calculate from real API responses
-  const totalLabs = labs.length;
-  const totalUsers = users.length;
-  const activeReservations = reservations.filter(
-    (r) => r.status === "Active",
-  ).length;
-  const availableSeats = labs.reduce((sum, lab) => sum + lab.availableSeats, 0);
+  const [stats, setStats] = useState({
+    total_labs: 0,
+    total_users: 0,
+    active_reservations: 0,
+    total_available_seats: 0,
+  });
+  const [labs, setLabs] = useState([]);
+  const [reservations, setReservations] = useState([]);
+
+  useEffect(() => {
+    fetchDashboardStats();
+    fetchLabs();
+    fetchReservations();
+  }, []);
+
+  function fetchDashboardStats() {
+    api
+      .get("/dashboard/")
+      .then((response) => {
+        setStats(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load dashboard stats");
+      });
+  }
+
+  function fetchLabs() {
+    api
+      .get("/labs/")
+      .then((response) => {
+        setLabs(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load labs");
+      });
+  }
+
+  function fetchReservations() {
+    api
+      .get("/reservations/")
+      .then((response) => {
+        setReservations(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load reservations");
+      });
+  }
 
   // Most recent 5 reservations
   const recentReservations = reservations.slice(0, 5);
@@ -155,7 +113,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
-            {totalLabs}
+            {stats.total_labs}
           </div>
           <div className="text-sm text-gray-500">Active lab rooms</div>
         </div>
@@ -180,7 +138,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
-            {totalUsers}
+            {stats.total_users}
           </div>
           <div className="text-sm text-gray-500">Registered students</div>
         </div>
@@ -205,7 +163,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
-            {activeReservations}
+            {stats.active_reservations}
           </div>
           <div className="text-sm text-gray-500">Ongoing today</div>
         </div>
@@ -230,7 +188,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
-            {availableSeats}
+            {stats.total_available_seats}
           </div>
           <div className="text-sm text-gray-500">Across all labs</div>
         </div>
@@ -256,26 +214,26 @@ function Dashboard() {
               <div key={lab.id}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {lab.room_number}
+                    Room {lab.room_number}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full ${
-                        lab.availableSeats === 0
+                        lab.status === "Full"
                           ? "bg-red-400"
-                          : lab.availableSeats / lab.totalSeats < 0.2
+                          : lab.status === "Almost Full"
                             ? "bg-yellow-400"
                             : "bg-green-400"
                       }`}
                       style={{
-                        width: `${((lab.totalSeats - lab.availableSeats) / lab.totalSeats) * 100}%`,
+                        width: `${((lab.total_seats - lab.available_seats) / lab.total_seats) * 100}%`,
                       }}
                     />
                   </div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
-                    {lab.availableSeats}/{lab.totalSeats}
+                    {lab.available_seats}/{lab.total_seats}
                   </span>
                 </div>
               </div>
@@ -308,19 +266,19 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-                {recentReservations.map((r) => (
+                {reservations.slice(0, 5).map((r) => (
                   <tr key={r.id}>
                     <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
-                      {r.student}
+                      {r.user_name}
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {r.lab}
+                      {r.lab_name}
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {r.date}
+                      {r.reservation_date}
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {r.time}
+                      {r.reservation_time}
                     </td>
                     <td className="px-4 py-3 text-center">
                       {getStatusBadge(r.status)}
