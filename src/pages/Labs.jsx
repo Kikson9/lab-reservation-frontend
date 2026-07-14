@@ -1,25 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ConfirmDialog from "../components/ConfirmDialog";
 import toast from "react-hot-toast";
-
-// Static placeholder data I will replace this with real API data
-
-const initialLabs = [
-  { id: 1, room_number: "Room 101", totalSeats: 30, availableSeats: 22 },
-  { id: 2, room_number: "Room 203", totalSeats: 30, availableSeats: 1 },
-  { id: 3, room_number: "Room 305", totalSeats: 40, availableSeats: 0 },
-  { id: 4, room_number: "Room 102", totalSeats: 25, availableSeats: 25 },
-];
+import api from "../axios";
 
 // Helper: decide badge color based on availability
-function getStatusBadge(available, total) {
-  if (available === 0) {
+function getStatusBadge(status) {
+  if (status === "Full") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
         Full
       </span>
     );
-  } else if (available / total < 0.2) {
+  } else if (status === "Almost Full") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-600">
         Almost Full
@@ -35,27 +27,42 @@ function getStatusBadge(available, total) {
 }
 
 function Labs() {
-  const [labs, setLabs] = useState(initialLabs);
+  const [labs, setLabs] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingLab, setEditingLab] = useState(null);
   const [formData, setFormData] = useState({
     room_number: "",
-    totalSeats: "",
-    availableSeats: "",
+    total_seats: "",
+    available_seats: "",
   });
   const [modalErrors, setModalErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [labToDelete, setLabToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  useEffect(() => {
+    fetchLabs();
+  }, []);
+
+  function fetchLabs() {
+    api
+      .get("/labs/")
+      .then((response) => {
+        setLabs(response.data);
+      })
+      .catch((error) => {
+        toast.error("Failed to load labs");
+      });
+  }
+
   const filteredLabs = labs.filter((lab) =>
-    lab.room_number.toLowerCase().includes(searchTerm.toLowerCase()),
+    lab.room_number.toString().includes(searchTerm),
   );
 
   // Open modal for adding a new lab
   function handleAddClick() {
     setEditingLab(null);
-    setFormData({ room_number: "", totalSeats: "", availableSeats: "" });
+    setFormData({ room_number: "", total_seats: "", available_seats: "" });
     setModalErrors({});
     setModalOpen(true);
   }
@@ -65,8 +72,8 @@ function Labs() {
     setEditingLab(lab);
     setFormData({
       room_number: lab.room_number,
-      totalSeats: lab.totalSeats,
-      availableSeats: lab.availableSeats,
+      total_seats: lab.total_seats,
+      available_seats: lab.available_seats,
     });
     setModalErrors({});
     setModalOpen(true);
@@ -79,10 +86,19 @@ function Labs() {
   }
 
   function handleDeleteConfirm() {
-    setLabs(labs.filter((lab) => lab.id !== labToDelete.id));
-    setConfirmOpen(false);
-    setLabToDelete(null);
-    toast.success("Lab deleted");
+    api
+      .delete(`/labs/${labToDelete.id}/`)
+      .then(() => {
+        toast.success("Lab deleted");
+        fetchLabs();
+        setConfirmOpen(false);
+        setLabToDelete(null);
+      })
+      .catch(() => {
+        toast.error("Failed to delete lab");
+        setConfirmOpen(false);
+        setLabToDelete(null);
+      });
   }
 
   // Handle form input changes
@@ -94,22 +110,30 @@ function Labs() {
   function validate() {
     const newErrors = {};
 
-    if (!formData.room_number.trim()) {
+    if (!formData.room_number) {
       newErrors.room_number = "Room number is required.";
+    } else if (isNaN(formData.room_number)) {
+      newErrors.room_number = "Room number must be a valid number.";
     }
 
-    if (!formData.totalSeats) {
-      newErrors.totalSeats = "Total seats is required.";
-    } else if (Number(formData.totalSeats) <= 0) {
-      newErrors.totalSeats = "Total seats must be greater than 0.";
+    if (!formData.total_seats) {
+      newErrors.total_seats = "Total seats is required.";
+    } else if (isNaN(formData.total_seats)) {
+      newErrors.total_seats = "Total seats must be a valid number.";
+    } else if (Number(formData.total_seats) <= 0) {
+      newErrors.total_seats = "Total seats must be greater than 0.";
     }
 
-    if (!formData.availableSeats && formData.availableSeats !== 0) {
-      newErrors.availableSeats = "Available seats is required.";
-    } else if (Number(formData.availableSeats) < 0) {
-      newErrors.availableSeats = "Available seats cannot be negative.";
-    } else if (Number(formData.availableSeats) > Number(formData.totalSeats)) {
-      newErrors.availableSeats = "Available seats cannot exceed total seats.";
+    if (!formData.available_seats && formData.available_seats !== 0) {
+      newErrors.available_seats = "Available seats is required.";
+    } else if (isNaN(formData.available_seats)) {
+      newErrors.available_seats = "Available seats must be a valid number.";
+    } else if (Number(formData.available_seats) < 0) {
+      newErrors.available_seats = "Available seats cannot be negative.";
+    } else if (
+      Number(formData.available_seats) > Number(formData.total_seats)
+    ) {
+      newErrors.available_seats = "Available seats cannot exceed total seats.";
     }
 
     return newErrors;
@@ -121,34 +145,37 @@ function Labs() {
       setModalErrors(validationErrors);
       return;
     }
-
     setModalErrors({});
 
+    const payload = {
+      room_number: Number(formData.room_number),
+      total_seats: Number(formData.total_seats),
+      available_seats: Number(formData.available_seats),
+    };
+
     if (editingLab) {
-      setLabs(
-        labs.map((lab) =>
-          lab.id === editingLab.id
-            ? {
-                ...lab,
-                ...formData,
-                totalSeats: Number(formData.totalSeats),
-                availableSeats: Number(formData.availableSeats),
-              }
-            : lab,
-        ),
-      );
-      toast.success("Lab updated successfully");
+      api
+        .put(`/labs/${editingLab.id}/`, payload)
+        .then(() => {
+          toast.success("Lab updated successfully");
+          fetchLabs();
+          setModalOpen(false);
+        })
+        .catch(() => {
+          toast.error("Failed to update lab");
+        });
     } else {
-      const newLab = {
-        id: labs.length + 1,
-        room_number: formData.room_number,
-        totalSeats: Number(formData.totalSeats),
-        availableSeats: Number(formData.availableSeats),
-      };
-      setLabs([...labs, newLab]);
-      toast.success("Lab added successfully");
+      api
+        .post("/labs/", payload)
+        .then(() => {
+          toast.success("Lab added successfully");
+          fetchLabs();
+          setModalOpen(false);
+        })
+        .catch(() => {
+          toast.error("Failed to add lab");
+        });
     }
-    setModalOpen(false);
   }
 
   return (
@@ -212,16 +239,16 @@ function Labs() {
               {filteredLabs.map((lab) => (
                 <tr key={lab.id}>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {lab.room_number}
+                    Room {lab.room_number}
                   </td>
                   <td className="px-4 py-3 text-center text-gray-600 dark:text-gray-300">
-                    {lab.totalSeats}
+                    {lab.total_seats}
                   </td>
                   <td className="px-4 py-3 text-center text-gray-600 dark:text-gray-300">
-                    {lab.availableSeats}
+                    {lab.available_seats}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    {getStatusBadge(lab.availableSeats, lab.totalSeats)}
+                    {getStatusBadge(lab.status)}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
@@ -245,7 +272,9 @@ function Labs() {
                     colSpan="5"
                     className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm"
                   >
-                    No labs found matching "{searchTerm}"
+                    {searchTerm
+                      ? `No labs found matching "${searchTerm}"`
+                      : 'No labs yet. Click "+ Add Lab" to create one.'}
                   </td>
                 </tr>
               )}
@@ -267,11 +296,11 @@ function Labs() {
                   Room Number
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   name="room_number"
                   value={formData.room_number}
                   onChange={handleChange}
-                  placeholder="e.g. Room 101"
+                  placeholder="e.g. 101"
                   className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     modalErrors.room_number
                       ? "border-red-400"
@@ -290,19 +319,19 @@ function Labs() {
                 </label>
                 <input
                   type="number"
-                  name="totalSeats"
-                  value={formData.totalSeats}
+                  name="total_seats"
+                  value={formData.total_seats}
                   onChange={handleChange}
                   placeholder="e.g. 30"
                   className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    modalErrors.totalSeats
+                    modalErrors.total_seats
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
                   }`}
                 />
-                {modalErrors.totalSeats && (
+                {modalErrors.total_seats && (
                   <p className="text-red-500 text-xs mt-1">
-                    {modalErrors.totalSeats}
+                    {modalErrors.total_seats}
                   </p>
                 )}
               </div>
@@ -312,19 +341,19 @@ function Labs() {
                 </label>
                 <input
                   type="number"
-                  name="availableSeats"
-                  value={formData.availableSeats}
+                  name="available_seats"
+                  value={formData.available_seats}
                   onChange={handleChange}
                   placeholder="e.g. 30"
                   className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    modalErrors.availableSeats
+                    modalErrors.available_seats
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
                   }`}
                 />
-                {modalErrors.availableSeats && (
+                {modalErrors.available_seats && (
                   <p className="text-red-500 text-xs mt-1">
-                    {modalErrors.availableSeats}
+                    {modalErrors.available_seats}
                   </p>
                 )}
               </div>
