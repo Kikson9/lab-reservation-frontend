@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ConfirmDialog from "../components/ConfirmDialog";
 import toast from "react-hot-toast";
+import api from "../axios";
 
 // Static placeholder data I will replace this with real API data
-
+/*
 const initialUsers = [
   {
     id: 1,
@@ -11,7 +12,7 @@ const initialUsers = [
     email: "daniel@university.edu",
     role: "Student",
     status: "Active",
-    studentId: "9240214001",
+    student_id: "9240214001",
   },
   {
     id: 2,
@@ -19,7 +20,7 @@ const initialUsers = [
     email: "adu@university.edu",
     role: "Student",
     status: "Active",
-    studentId: "9240214002",
+    student_id: "9240214002",
   },
   {
     id: 3,
@@ -27,7 +28,7 @@ const initialUsers = [
     email: "sixtus@university.edu",
     role: "Admin",
     status: "Active",
-    studentId: "",
+    student_id: "",
   },
   {
     id: 4,
@@ -35,9 +36,10 @@ const initialUsers = [
     email: "ben@university.edu",
     role: "Student",
     status: "Inactive",
-    studentId: "9240214004",
+    student_id: "9240214004",
   },
 ];
+*/
 
 function getRoleBadge(role) {
   return role === "Admin" ? (
@@ -64,36 +66,55 @@ function getStatusBadge(status) {
 }
 
 function Users() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
-    name: "",
+    first_name: "",
     email: "",
     role: "Student",
     status: "Active",
-    studentId: "",
+    student_id: "",
   });
   const [modalErrors, setModalErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  function fetchUsers() {
+    api
+      .get("/users/")
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load users");
+      });
+  }
+
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.studentId?.toLowerCase().includes(searchTerm.toLowerCase()),
+      (user.student_id &&
+        user.student_id
+          .toString()
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())),
   );
 
   function handleAddClick() {
     setEditingUser(null);
     setFormData({
-      name: "",
+      first_name: "",
       email: "",
       role: "Student",
       status: "Active",
-      studentId: "",
+      student_id: "",
     });
     setModalErrors({});
     setModalOpen(true);
@@ -102,11 +123,11 @@ function Users() {
   function handleEditClick(user) {
     setEditingUser(user);
     setFormData({
-      name: user.name,
+      first_name: user.first_name,
       email: user.email,
       role: user.role,
       status: user.status,
-      studentId: user.studentId || "",
+      student_id: user.student_id || "",
     });
     setModalErrors({});
     setModalOpen(true);
@@ -118,24 +139,36 @@ function Users() {
   }
 
   function handleDeleteConfirm() {
-    setUsers(users.filter((user) => user.id !== userToDelete.id));
-    setConfirmOpen(false);
-    setUserToDelete(null);
-    toast.success("User deleted");
+    api
+      .delete(`/users/${userToDelete.id}/`)
+      .then(() => {
+        toast.success("User deleted");
+        fetchUsers();
+        setConfirmOpen(false);
+        setUserToDelete(null);
+      })
+      .catch(() => {
+        toast.error("Failed to delete user");
+        setConfirmOpen(false);
+        setUserToDelete(null);
+      });
   }
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (modalErrors[e.target.name]) {
+      setModalErrors({ ...modalErrors, [e.target.name]: "" });
+    }
   }
 
   function validate() {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Full name is required.";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters.";
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = "Full name is required.";
+    } else if (formData.first_name.trim().length < 2) {
+      newErrors.first_name = "Name must be at least 2 characters.";
     }
 
     if (!formData.email) {
@@ -145,10 +178,10 @@ function Users() {
     }
 
     if (formData.role === "Student") {
-      if (!formData.studentId.trim()) {
-        newErrors.studentId = "Student ID is required.";
-      } else if (formData.studentId.trim().length < 4) {
-        newErrors.studentId = "Please enter a valid Student ID.";
+      if (!formData.student_id.trim()) {
+        newErrors.student_id = "Student ID is required.";
+      } else if (formData.student_id.trim().length < 4) {
+        newErrors.student_id = "Please enter a valid Student ID.";
       }
     }
 
@@ -164,22 +197,38 @@ function Users() {
 
     setModalErrors({});
 
+    const payload = {
+      username: formData.email,
+      first_name: formData.first_name,
+      email: formData.email,
+      role: formData.role,
+      student_id: formData.role === "Student" ? formData.student_id : null,
+      is_active: formData.status === "Active",
+    };
+
     if (editingUser) {
-      setUsers(
-        users.map((user) =>
-          user.id === editingUser.id ? { ...user, ...formData } : user,
-        ),
-      );
-      toast.success("User updated successfully");
+      api
+        .put(`/users/${editingUser.id}/`, payload)
+        .then(() => {
+          toast.success("User updated successfully");
+          fetchUsers();
+          setModalOpen(false);
+        })
+        .catch(() => {
+          toast.error("Failed to update user");
+        });
     } else {
-      const newUser = {
-        id: users.length + 1,
-        ...formData,
-      };
-      setUsers([...users, newUser]);
-      toast.success("User added successfully");
+      api
+        .post("/users/", payload)
+        .then(() => {
+          toast.success("User added successfully");
+          fetchUsers();
+          setModalOpen(false);
+        })
+        .catch(() => {
+          toast.error("Failed to add user");
+        });
     }
-    setModalOpen(false);
   }
 
   return (
@@ -240,7 +289,7 @@ function Users() {
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
-                    {user.name}
+                    {user.first_name}
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                     {user.email}
@@ -251,7 +300,7 @@ function Users() {
                         N/A
                       </span>
                     ) : (
-                      user.studentId || (
+                      user.student_id || (
                         <span className="text-red-400 text-xs">Not set</span>
                       )
                     )}
@@ -284,7 +333,9 @@ function Users() {
                     colSpan="6"
                     className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm"
                   >
-                    No users found matching "{searchTerm}"
+                    {searchTerm
+                      ? `No users found matching "${searchTerm}"`
+                      : 'No users yet. Click "+ Add User" to create one.'}{" "}
                   </td>
                 </tr>
               )}
@@ -308,19 +359,19 @@ function Users() {
                 </label>
                 <input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="first_name"
+                  value={formData.first_name}
                   onChange={handleChange}
                   placeholder="e.g. Daniel Okike"
                   className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    modalErrors.name
+                    modalErrors.first_name
                       ? "border-red-400"
                       : "border-gray-200 dark:border-gray-700"
                   }`}
                 />
                 {modalErrors.name && (
                   <p className="text-red-500 text-xs mt-1">
-                    {modalErrors.name}
+                    {modalErrors.first_name}
                   </p>
                 )}
               </div>
@@ -354,19 +405,19 @@ function Users() {
                   </label>
                   <input
                     type="text"
-                    name="studentId"
-                    value={formData.studentId}
+                    name="student_id"
+                    value={formData.student_id}
                     onChange={handleChange}
                     placeholder="e.g. 9240214001"
                     className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                      modalErrors.studentId
+                      modalErrors.student_id
                         ? "border-red-400"
                         : "border-gray-200 dark:border-gray-700"
                     }`}
                   />
-                  {modalErrors.studentId && (
+                  {modalErrors.student_id && (
                     <p className="text-red-500 text-xs mt-1">
-                      {modalErrors.studentId}
+                      {modalErrors.student_id}
                     </p>
                   )}
                 </div>
@@ -424,7 +475,7 @@ function Users() {
       <ConfirmDialog
         isOpen={confirmOpen}
         title="Delete User?"
-        message={`${userToDelete?.name} will be permanently removed. This cannot be undone.`}
+        message={`${userToDelete?.first_name} will be permanently removed. This cannot be undone.`}
         confirmLabel="Delete"
         confirmStyle="danger"
         onConfirm={handleDeleteConfirm}
