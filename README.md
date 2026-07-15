@@ -106,10 +106,10 @@ The **backend** is a Django REST Framework API exposing resource-based endpoints
 
 This project is split across two repositories:
 
-| Repository                 | Description             | Link      |
-| -------------------------- | ----------------------- | --------- |
-| `lab-reservation-frontend` | React frontend          | [link](#) |
-| `lab-reservation-backend`  | Django REST API backend | [link](#) |
+| Repository                 | Description             | Link                                                        |
+| -------------------------- | ----------------------- | ----------------------------------------------------------- |
+| `lab-reservation-frontend` | React frontend          | [link](https://github.com/Kikson9/lab-reservation-frontend) |
+| `lab-reservation-backend`  | Django REST API backend | [link](https://github.com/KbAhenkan/lab-reservation-system) |
 
 Both repositories are required to run the full application. This README documents the frontend; refer to the backend repository's own README for backend-specific details.
 
