@@ -226,8 +226,13 @@ function Users() {
           fetchUsers();
           setModalOpen(false);
         })
-        .catch(() => {
-          toast.error("Failed to update user");
+        .catch((error) => {
+          const errorMsg =
+            error.response?.data?.student_id?.[0] ||
+            error.response?.data?.email?.[0] ||
+            error.response?.data?.password?.[0] ||
+            "Failed to update user";
+          toast.error(errorMsg);
         });
     } else {
       api
@@ -237,8 +242,12 @@ function Users() {
           fetchUsers();
           setModalOpen(false);
         })
-        .catch(() => {
-          toast.error("Failed to add user");
+        .catch((error) => {
+          const errorMsg =
+            error.response?.data?.student_id?.[0] ||
+            error.response?.data?.email?.[0] ||
+            "Failed to add user";
+          toast.error(errorMsg);
         });
     }
   }
