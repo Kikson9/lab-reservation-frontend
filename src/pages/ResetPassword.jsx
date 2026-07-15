@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import api from "../axios";
 
 function getPasswordStrength(password) {
   if (password.length === 0) return null;
@@ -11,6 +13,8 @@ function getPasswordStrength(password) {
 }
 
 function ResetPassword() {
+  const [SearchParams] = useSearchParams();
+  const token = SearchParams.get("token");
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
@@ -53,14 +57,23 @@ function ResetPassword() {
     }
     setErrors({});
     setLoading(true);
-    // API POINT - replace with:
-    // const token = new URLSearchParams(window.location.search).get('token');
-    // axios.post('/api/auth/reset-password/', { token, password: formData.password })
-    //   .then(() => setSubmitted(true))
-    //   .catch(() => setErrors({ password: 'Reset link is invalid or has expired.' }))
-    console.log("Password reset submitted:", formData.password);
-    setLoading(false);
-    setSubmitted(true);
+
+    api
+      .post("/auth/password-reset/confirm/", {
+        token: token,
+        password: formData.password,
+      })
+      .then(() => {
+        setLoading(false);
+        setSubmitted(true);
+      })
+      .catch((error) => {
+        setLoading(false);
+        const errorMsg =
+          error.response?.data?.error ||
+          "Something went wrong. Please try again.";
+        setErrors({ password: errorMsg });
+      });
   }
 
   const eyeOff = (
