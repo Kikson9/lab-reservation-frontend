@@ -32,7 +32,17 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const publicEndpoints = [
+      "/auth/login/",
+      "/auth/signup/",
+      "/auth/password-reset/",
+      "/auth/password-reset/confirm/",
+    ];
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      error.config?.url?.includes(endpoint),
+    );
+
+    if (error.response && error.response.status === 401 && !isPublicEndpoint) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
