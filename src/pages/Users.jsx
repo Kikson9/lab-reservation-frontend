@@ -75,6 +75,7 @@ function Users() {
     role: "Student",
     status: "Active",
     student_id: "",
+    password: "",
   });
   const [modalErrors, setModalErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -115,6 +116,7 @@ function Users() {
       role: "Student",
       status: "Active",
       student_id: "",
+      password: "",
     });
     setModalErrors({});
     setModalOpen(true);
@@ -185,6 +187,15 @@ function Users() {
       }
     }
 
+    // Only require password when adding a new user, not editing
+    if (!editingUser) {
+      if (!formData.password) {
+        newErrors.password = "Password is required.";
+      } else if (formData.password.length < 8) {
+        newErrors.password = "Password must be at least 8 characters.";
+      }
+    }
+
     return newErrors;
   }
 
@@ -204,6 +215,7 @@ function Users() {
       role: formData.role,
       student_id: formData.role === "Student" ? formData.student_id : null,
       is_active: formData.status === "Active",
+      ...(!editingUser && { password: formData.password }),
     };
 
     if (editingUser) {
@@ -397,6 +409,30 @@ function Users() {
                   </p>
                 )}
               </div>
+              {!editingUser && (
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Set an initial password"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                      modalErrors.password
+                        ? "border-red-400"
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                  />
+                  {modalErrors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {modalErrors.password}
+                    </p>
+                  )}
+                </div>
+              )}
               {/* Student ID - only for students */}
               {formData.role === "Student" && (
                 <div className="col-span-2">
