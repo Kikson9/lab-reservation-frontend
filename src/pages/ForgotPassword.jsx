@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../axios";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -19,10 +20,17 @@ function ForgotPassword() {
     }
     setError("");
     setLoading(true);
-    // API POINT - POST email to Django password reset endpoint
-    console.log("Password reset requested for:", email);
-    setLoading(false);
-    setSubmitted(true);
+
+    api
+      .post("/auth/password-reset/", { email })
+      .then(() => {
+        setLoading(false);
+        setSubmitted(true);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError("Something went wrong. Please try again.");
+      });
   }
 
   return (
