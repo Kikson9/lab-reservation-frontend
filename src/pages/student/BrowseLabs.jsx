@@ -1,22 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../axios";
+import toast from "react-hot-toast";
 
-// API POINT - replace this with axios.get('/api/labs/') inside a useEffect
-const initialLabs = [
-  { id: 1, room_number: "Room 101", totalSeats: 30, availableSeats: 22 },
-  { id: 2, room_number: "Room 203", totalSeats: 30, availableSeats: 1 },
-  { id: 3, room_number: "Room 305", totalSeats: 40, availableSeats: 0 },
-  { id: 4, room_number: "Room 102", totalSeats: 25, availableSeats: 25 },
-];
-
-function getStatusBadge(available, total) {
-  if (available === 0) {
+function getStatusBadge(status) {
+  if (status === "Full") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
         Full
       </span>
     );
-  } else if (available / total < 0.2) {
+  } else if (status === "Almost Full") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-600">
         Almost Full
@@ -32,12 +26,26 @@ function getStatusBadge(available, total) {
 }
 
 function BrowseLabs() {
-  const [labs] = useState(initialLabs);
+  const [labs, setLabs] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchLabs();
+  }, []);
+
+  function fetchLabs() {
+    api
+      .get("/labs/")
+      .then((response) => {
+        setLabs(response.data);
+      })
+      .catch(() => {
+        toast.error("Failed to load labs");
+      });
+  }
 
   function handleBookClick(lab) {
     // Pass the selected lab to the BookSeat page via navigation state
-    // API POINT - lab object here will come from real API data in Phase 3
     navigate("/student/book-seat", { state: { lab } });
   }
 
@@ -65,9 +73,9 @@ function BrowseLabs() {
               {/* Room number and status badge */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                  {lab.room_number}
+                  Room {lab.room_number}
                 </h2>
-                {getStatusBadge(lab.availableSeats, lab.totalSeats)}
+                {getStatusBadge(lab.status)}
               </div>
 
               {/* Seat info */}
@@ -77,7 +85,7 @@ function BrowseLabs() {
                     Total Seats
                   </span>
                   <span className="font-medium text-gray-700 dark:text-gray-300">
-                    {lab.totalSeats}
+                    {lab.total_seats}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -85,7 +93,7 @@ function BrowseLabs() {
                     Available
                   </span>
                   <span className="font-medium text-gray-700 dark:text-gray-300">
-                    {lab.availableSeats}
+                    {lab.available_seats}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -93,7 +101,7 @@ function BrowseLabs() {
                     Occupied
                   </span>
                   <span className="font-medium text-gray-700 dark:text-gray-300">
-                    {lab.totalSeats - lab.availableSeats}
+                    {lab.total_seats - lab.available_seats}
                   </span>
                 </div>
               </div>
@@ -102,14 +110,14 @@ function BrowseLabs() {
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
                 <div
                   className={`h-2 rounded-full transition-all duration-300 ${
-                    lab.availableSeats === 0
+                    lab.status === "Full"
                       ? "bg-red-400"
-                      : lab.availableSeats / lab.totalSeats < 0.2
+                      : lab.status === "Almost Full"
                         ? "bg-yellow-400"
                         : "bg-green-400"
                   }`}
                   style={{
-                    width: `${((lab.totalSeats - lab.availableSeats) / lab.totalSeats) * 100}%`,
+                    width: `${((lab.total_seats - lab.available_seats) / lab.total_seats) * 100}%`,
                   }}
                 ></div>
               </div>
@@ -118,14 +126,14 @@ function BrowseLabs() {
             {/* Book button */}
             <button
               onClick={() => handleBookClick(lab)}
-              disabled={lab.availableSeats === 0}
+              disabled={lab.available_seats === 0}
               className={`w-full py-2 rounded-lg text-sm font-semibold transition duration-150 ${
-                lab.availableSeats === 0
+                lab.available_seats === 0
                   ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}
             >
-              {lab.availableSeats === 0 ? "Fully Booked" : "Book a Seat"}
+              {lab.available_seats === 0 ? "Fully Booked" : "Book a Seat"}
             </button>
           </div>
         ))}
