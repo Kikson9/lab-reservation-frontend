@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import api from "../../axios";
+import { useAuth } from "../../context/AuthContext";
 
 function BookSeat() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Read the lab passed from Browse Labs
-  // API POINT - in Phase 3 lab data comes from API, not navigation state
   const { lab } = location.state || {};
 
   const [formData, setFormData] = useState({
@@ -17,7 +19,7 @@ function BookSeat() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Guard clause cus if no lab was passed, show a safe fallback
+  // Guard clause - if no lab was passed, show a safe fallback
   if (!lab) {
     return (
       <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
@@ -72,29 +74,30 @@ function BookSeat() {
     setErrors({});
     setLoading(true);
 
-    // API POINT - replace with:
-    // axios.post('/api/reservations/', {
-    //   lab_id: lab.id,
-    //   date: formData.date,
-    //   time: formData.time,
-    // }).then(() => {
-    //   setSubmitted(true);
-    // }).catch(err => {
-    //   setErrors({ date: 'This slot is already booked. Please choose another time.' });
-    // })
+    // Combine date and time into one ISO datetime string
+    const isoDateTime = `${formData.date}T${formData.time}:00`;
 
-    console.log("Booking submitted:", {
-      lab: lab.room_number,
-      date: formData.date,
-      time: formData.time,
-    });
-
-    setLoading(false);
-    setSubmitted(true);
+    api
+      .post("/reservations/", {
+        user: user.id,
+        lab: lab.id,
+        reservation_date: isoDateTime,
+        status: "Confirmed",
+      })
+      .then(() => {
+        setLoading(false);
+        setSubmitted(true);
+      })
+      .catch((error) => {
+        setLoading(false);
+        const errorMsg =
+          error.response?.data?.error ||
+          "Failed to book seat. Please try again.";
+        setErrors({ date: errorMsg });
+      });
   }
 
   // Get today's date in YYYY-MM-DD format for the min attribute on the date input
-  // This prevents selecting past dates directly from the date picker
   const today = new Date().toISOString().split("T")[0];
 
   return (
@@ -120,7 +123,9 @@ function BookSeat() {
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
             You have successfully booked a seat in
           </p>
-          <p className="text-blue-600 font-semibold mb-1">{lab.room_number}</p>
+          <p className="text-blue-600 font-semibold mb-1">
+            Room {lab.room_number}
+          </p>
           <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
             {formData.date} at {formData.time}
           </p>
@@ -158,10 +163,10 @@ function BookSeat() {
               Selected Lab
             </p>
             <p className="text-lg font-bold text-blue-700 dark:text-blue-500">
-              {lab.room_number}
+              Room {lab.room_number}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {lab.availableSeats} of {lab.totalSeats} seats available
+              {lab.available_seats} of {lab.total_seats} seats available
             </p>
           </div>
 

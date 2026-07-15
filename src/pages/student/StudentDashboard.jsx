@@ -1,5 +1,8 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../../axios";
+import toast from "react-hot-toast";
 
 // API point - replace with axios.get('/api/reservations/my/') in useEffect
 const myReservations = [
@@ -27,22 +30,22 @@ const myReservations = [
 ];
 
 function getStatusBadge(status) {
-  if (status === "Active") {
+  if (status === "Full") {
     return (
-      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
-        Active
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
+        Full
       </span>
     );
-  } else if (status === "Pending") {
+  } else if (status === "Almost Full") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-600">
-        Pending
+        Almost Full
       </span>
     );
   } else {
     return (
-      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
-        Cancelled
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
+        Open
       </span>
     );
   }
