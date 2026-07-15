@@ -1,69 +1,62 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../axios";
 import toast from "react-hot-toast";
-
-// API point - replace with axios.get('/api/reservations/my/') in useEffect
-const myReservations = [
-  {
-    id: 1,
-    lab: "Room 101",
-    date: "2025-06-01",
-    time: "09:00",
-    status: "Active",
-  },
-  {
-    id: 2,
-    lab: "Room 203",
-    date: "2025-06-03",
-    time: "11:00",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    lab: "Room 305",
-    date: "2025-05-19",
-    time: "14:00",
-    status: "Cancelled",
-  },
-];
+import { useAuth } from "../../context/AuthContext";
 
 function getStatusBadge(status) {
-  if (status === "Full") {
+  if (status === "Confirmed") {
     return (
-      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
-        Full
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
+        Confirmed
       </span>
     );
-  } else if (status === "Almost Full") {
+  } else if (status === "Pending") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-600">
-        Almost Full
+        Pending
       </span>
     );
   } else {
     return (
-      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
-        Open
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600">
+        Cancelled
       </span>
     );
   }
 }
 
 function StudentDashboard() {
-  // Derive stats directly from the data
-  // API point - in Phase 3 these calculate from real API response
-  const activeCount = myReservations.filter(
-    (r) => r.status === "Active",
+  const { user } = useAuth();
+  const [reservations, setReservations] = useState([]);
+
+  useEffect(() => {
+    fetchMyReservations();
+  }, []);
+
+  function fetchMyReservations() {
+    api
+      .get("/reservations/")
+      .then((response) => {
+        const mine = response.data.filter((r) => r.user === user.id);
+        setReservations(mine);
+      })
+      .catch(() => {
+        toast.error("Failed to load your reservations");
+      });
+  }
+
+  // Derive stats directly from the filtered data
+  const activeCount = reservations.filter(
+    (r) => r.status === "Confirmed",
   ).length;
-  const pendingCount = myReservations.filter(
+  const pendingCount = reservations.filter(
     (r) => r.status === "Pending",
   ).length;
-  const totalCount = myReservations.length;
+  const totalCount = reservations.length;
 
   // Only show non-cancelled, max 3
-  const upcoming = myReservations
+  const upcoming = reservations
     .filter((r) => r.status !== "Cancelled")
     .slice(0, 3);
 
@@ -80,7 +73,7 @@ function StudentDashboard() {
               if (hour < 17) return "Good afternoon";
               return "Good evening";
             })()}
-            , Student
+            , {user?.full_name.split(" ").at(-1)}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Here's a summary of your lab activity
@@ -214,13 +207,13 @@ function StudentDashboard() {
                 {upcoming.map((r) => (
                   <tr key={r.id}>
                     <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
-                      {r.lab}
+                      {r.lab_name}
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {r.date}
+                      {r.reservation_date}
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {r.time}
+                      {r.reservation_time}
                     </td>
                     <td className="px-4 py-3 text-center">
                       {getStatusBadge(r.status)}
