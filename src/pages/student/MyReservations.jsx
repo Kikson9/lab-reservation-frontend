@@ -1,36 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-// API POINT - replace with axios.get('/api/reservations/my/') in useEffect
-const initialReservations = [
-  {
-    id: 1,
-    lab: "Room 101",
-    date: "2026-05-20",
-    time: "09:00",
-    status: "Active",
-  },
-  {
-    id: 2,
-    lab: "Room 203",
-    date: "2026-05-22",
-    time: "11:00",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    lab: "Room 305",
-    date: "2026-05-19",
-    time: "14:00",
-    status: "Cancelled",
-  },
-];
+import api from "../../axios";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 function getStatusBadge(status) {
-  if (status === "Active") {
+  if (status === "Confirmed") {
     return (
       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-600">
-        Active
+        Confirmed
       </span>
     );
   } else if (status === "Pending") {
@@ -49,19 +27,36 @@ function getStatusBadge(status) {
 }
 
 function MyReservations() {
-  const [reservations, setReservations] = useState(initialReservations);
+  const { user } = useAuth();
+  const [reservations, setReservations] = useState([]);
+
+  useEffect(() => {
+    fetchMyReservations();
+  }, []);
+
+  function fetchMyReservations() {
+    api
+      .get("/reservations/")
+      .then((response) => {
+        // Filter to only this logged in student's own reservations
+        const mine = response.data.filter((r) => r.user === user.id);
+        setReservations(mine);
+      })
+      .catch(() => {
+        toast.error("Failed to load your reservations");
+      });
+  }
 
   function handleCancel(id) {
-    // API POINT - replace with:
-    // axios.patch(`/api/reservations/${id}/cancel/`)
-    //   .then(() => setReservations(reservations.map(r =>
-    //     r.id === id ? { ...r, status: 'Cancelled' } : r
-    //   )))
-    setReservations(
-      reservations.map((r) =>
-        r.id === id ? { ...r, status: "Cancelled" } : r,
-      ),
-    );
+    api
+      .patch(`/reservations/${id}/`, { status: "Cancelled" })
+      .then(() => {
+        toast.success("Reservation cancelled");
+        fetchMyReservations();
+      })
+      .catch(() => {
+        toast.error("Failed to cancel reservation");
+      });
   }
 
   return (
@@ -86,9 +81,8 @@ function MyReservations() {
 
       {/* Empty state or table */}
       {reservations.length === 0 ? (
-        /* Empty state */
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs p-12 text-center">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="28"
@@ -115,7 +109,6 @@ function MyReservations() {
           </Link>
         </div>
       ) : (
-        /* Reservations table */
         <div className="bg-white dark:bg-gray-800 shadow-xs rounded-xl">
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
@@ -132,13 +125,13 @@ function MyReservations() {
                 {reservations.map((r) => (
                   <tr key={r.id}>
                     <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
-                      {r.lab}
+                      {r.lab_name}
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {r.date}
+                      {r.reservation_date}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray:400">
-                      {r.time}
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                      {r.reservation_time}
                     </td>
                     <td className="px-4 py-3 text-center">
                       {getStatusBadge(r.status)}
