@@ -76,7 +76,7 @@ function Dashboard() {
   }
 
   // Most recent 5 reservations
-  const recentReservations = reservations.slice(0, 5);
+  const recentReservations = reservations.slice(-5).reverse();
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
@@ -266,7 +266,7 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-                {reservations.slice(0, 5).map((r) => (
+                {recentReservations.map((r) => (
                   <tr key={r.id}>
                     <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
                       {r.user_name}
