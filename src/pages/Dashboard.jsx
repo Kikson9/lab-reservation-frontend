@@ -195,7 +195,7 @@ function Dashboard() {
       </div>
 
       {/* Bottom two columns */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-6 items-start">
         {/* Lab availability snapshot */}
         <div className="col-span-12 xl:col-span-4 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
