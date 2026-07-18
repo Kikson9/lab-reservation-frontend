@@ -418,20 +418,6 @@ function Signup() {
             </div>
 
             {/* Role */}
-            <div>
-              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
-                Role
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-[9px] text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-[3px] focus:ring-blue-600/10 focus:border-blue-600 transition-all"
-              >
-                <option value="Student">Student</option>
-                <option value="Admin">Admin</option>
-              </select>
-            </div>
 
             {/* Student ID */}
             {formData.role === "Student" && (
